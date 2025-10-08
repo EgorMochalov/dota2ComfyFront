@@ -73,6 +73,17 @@
           }
         }, 1000);
       });
+
+      // Fallback for module loading issues
+      window.addEventListener('error', function(e) {
+        if (e.target.tagName === 'SCRIPT' && e.target.type === 'module') {
+          console.error('Module loading failed:', e.error);
+          // Try to reload the page as fallback
+          setTimeout(() => {
+            window.location.reload();
+          }, 2000);
+        }
+      });
     </script>
   </body>
 </html>

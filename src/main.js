@@ -8,36 +8,32 @@ import './style.css'
 import App from './App.vue'
 import router from './router'
 
-// Создаем приложение ДО использования хранилищ
 const app = createApp(App)
 const pinia = createPinia()
 
-// Устанавливаем плагины
 app.use(pinia)
 app.use(router)
 app.use(ElementPlus)
 
-// Регистрируем иконки
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
   app.component(key, component)
 }
 
-// Монтируем приложение
-app.mount('#app')
-
-// Инициализация после монтирования (неблокирующая)
+// Инициализация приложения
 const initializeApp = async () => {
   const { useAuthStore } = await import('./stores/auth')
   const { useNotificationsStore } = await import('./stores/notifications')
   const { webSocketService } = await import('./services/websocket')
-  
+
   const authStore = useAuthStore()
   const notificationsStore = useNotificationsStore()
   
   try {
+    // Проверяем наличие токена и загружаем пользователя
     if (authStore.token) {
       await authStore.getCurrentUser()
       
+      // Инициализируем WebSocket если пользователь авторизован
       if (authStore.isAuthenticated && authStore.user) {
         webSocketService.connect(authStore.token, authStore.user)
         await notificationsStore.initialize()
@@ -45,11 +41,13 @@ const initializeApp = async () => {
     }
   } catch (error) {
     console.error('Failed to initialize app:', error)
+    // Если произошла ошибка при инициализации, разлогиниваем пользователя
     if (authStore.isAuthenticated) {
       await authStore.logout()
     }
+  } finally {
+    app.mount('#app')
   }
 }
 
-// Запускаем инициализацию после рендера
-setTimeout(initializeApp, 0)
+initializeApp()

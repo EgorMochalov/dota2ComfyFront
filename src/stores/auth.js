@@ -57,8 +57,8 @@ export const useAuthStore = defineStore('auth', () => {
     
     try {
       const response = await authAPI.getMe()
-      user.value = response.data
-      safeLocalStorage.setItem('user', response.data)
+      user.value = response.data.user
+      safeLocalStorage.setItem('user', response.data.user)
       return response.data
     } catch (error) {
       console.error('Get current user error:', error)

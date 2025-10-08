@@ -1,7 +1,15 @@
 <template>
   <div id="app">
+    <!-- Состояние загрузки -->
+    <div v-if="appLoading" class="app-loading">
+      <div class="loading-spinner">
+        <!-- Ваш лоадер здесь -->
+        <p>Загрузка...</p>
+      </div>
+    </div>
+
     <!-- Для авторизованных пользователей показываем полный layout -->
-    <div v-if="authStore.isAuthenticated" class="authenticated-layout">
+    <div v-else-if="authStore.isAuthenticated" class="authenticated-layout">
       <Header />
       <div class="main-container">
         <Sidebar />
@@ -28,7 +36,7 @@
 </template>
 
 <script>
-import { onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useAuthStore } from './stores/auth'
 import Header from './components/Layout/Header.vue'
 import Sidebar from './components/Layout/Sidebar.vue'
@@ -43,21 +51,27 @@ export default {
   },
   setup() {
     const authStore = useAuthStore()
+    const appLoading = ref(true)
 
     // При загрузке приложения проверяем авторизацию
     onMounted(async () => {
-      if (authStore.token) {
-        try {
+      try {
+        if (authStore.token) {
           await authStore.getCurrentUser()
-        } catch (error) {
-          // Если токен невалидный, разлогиниваем пользователя
-          await authStore.logout()
         }
+      } catch (error) {
+        console.error('Auth check failed:', error)
+        // Если токен невалидный, разлогиниваем пользователя
+        await authStore.logout()
+      } finally {
+        // Всегда скрываем лоадер после проверки
+        appLoading.value = false
       }
     })
 
     return {
-      authStore
+      authStore,
+      appLoading
     }
   }
 }
@@ -80,6 +94,16 @@ export default {
   transform: translateX(-30px);
 }
 
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
 #app {
   min-height: 100vh;
   display: flex;
@@ -90,6 +114,7 @@ export default {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  animation: layout-fade-in 0.3s ease;
 }
 
 .main-container {
@@ -110,5 +135,45 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
+  animation: layout-fade-in 0.3s ease;
+}
+
+/* Лоадер приложения */
+.app-loading {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.loading-spinner {
+  text-align: center;
+}
+
+.loading-spinner p {
+  margin-top: 10px;
+  color: #666;
+}
+
+/* Анимация появления layout */
+@keyframes layout-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Убедитесь, что скрыты элементы при переключении */
+.authenticated-layout,
+.auth-layout {
+  width: 100%;
 }
 </style>

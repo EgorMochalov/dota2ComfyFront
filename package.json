@@ -7,8 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "preview:build": "vite build && vite preview",
-    "vercel-build": "vite build"
+    "preview:build": "vite build && vite preview"
   },
   "dependencies": {
     "vue": "^3.3.11",
@@ -22,7 +21,7 @@
   "devDependencies": {
     "vite": "^5.0.8",
     "@vitejs/plugin-vue": "^4.5.2",
-    "@vercel/static-build": "^1.3.1"
+    "terser": "^5.27.0"
   },
   "description": "Dota 2 Teammate Finder - платформа для поиска тиммейтов и команд",
   "keywords": ["dota2", "teammate", "finder", "gaming", "vue", "websocket"],

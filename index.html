@@ -18,7 +18,7 @@
         margin: 0;
         padding: 0;
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        background-color: #f8f9fa;
+        background-color: #f8fafc;
         color: #2c3e50;
       }
       
@@ -41,7 +41,7 @@
         width: 40px;
         height: 40px;
         border: 4px solid #f3f3f3;
-        border-top: 4px solid #3498db;
+        border-top: 4px solid #667eea;
         border-radius: 50%;
         animation: spin 1s linear infinite;
       }
@@ -49,6 +49,17 @@
       @keyframes spin {
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
+      }
+
+      /* Fallback для ошибок загрузки */
+      .error-fallback {
+        display: none;
+        text-align: center;
+        padding: 40px 20px;
+      }
+
+      .error-fallback.show {
+        display: block;
       }
     </style>
   </head>
@@ -59,30 +70,40 @@
         <p>Загрузка Dota 2 Teammate Finder...</p>
       </div>
     </div>
+
+    <!-- Fallback для ошибок -->
+    <div id="error-fallback" class="error-fallback">
+      <h2>Произошла ошибка при загрузке приложения</h2>
+      <p>Пожалуйста, обновите страницу или попробуйте позже.</p>
+      <button onclick="window.location.reload()">Обновить страницу</button>
+    </div>
     
     <script type="module" src="/src/main.js"></script>
     
     <script>
+      // Обработчик ошибок загрузки
+      window.addEventListener('error', function(e) {
+        console.error('Application error:', e.error);
+        const fallback = document.getElementById('error-fallback');
+        const spinner = document.querySelector('.loading-spinner');
+        
+        if (spinner) {
+          spinner.style.display = 'none';
+        }
+        if (fallback) {
+          fallback.classList.add('show');
+        }
+      });
+
       // Remove loading spinner when app is mounted
       window.addEventListener('load', function() {
         setTimeout(() => {
           const spinner = document.querySelector('.loading-spinner');
-          if (spinner) {
+          if (spinner && document.getElementById('app').__vue_app__) {
             spinner.style.opacity = '0';
             setTimeout(() => spinner.remove(), 300);
           }
         }, 1000);
-      });
-
-      // Fallback for module loading issues
-      window.addEventListener('error', function(e) {
-        if (e.target.tagName === 'SCRIPT' && e.target.type === 'module') {
-          console.error('Module loading failed:', e.error);
-          // Try to reload the page as fallback
-          setTimeout(() => {
-            window.location.reload();
-          }, 2000);
-        }
       });
     </script>
   </body>

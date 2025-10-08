@@ -330,16 +330,16 @@
                 :disabled="player.id === authStore.user?.id || player.is_blocked"
                 class="action-btn"
               >
-                <el-icon><ChatDotRound /></el-icon>
                 Написать
+                <el-icon><ChatDotRound /></el-icon>
               </el-button>
               <el-button
                 size="small"
                 @click="$router.push(`/users/${player.id}`)"
                 class="action-btn"
               >
-                <el-icon><View /></el-icon>
                 Профиль
+                <el-icon><View /></el-icon>
               </el-button>
               <el-button
                 v-if="authStore.user?.team_id && authStore.user?.team_id !== player.team_id"

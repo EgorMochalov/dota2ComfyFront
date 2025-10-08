@@ -286,8 +286,8 @@
                 :disabled="team?.captain.id === authStore.user?.id"
                 class="full-width-btn"
               >
-                <el-icon><ChatDotRound /></el-icon>
                 Написать капитану
+                <el-icon><ChatDotRound /></el-icon>
               </el-button>
             </div>
           </el-card>

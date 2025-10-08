@@ -29,13 +29,6 @@ export default defineConfig({
       '~': resolve(__dirname, 'src')
     }
   },
-  css: {
-    preprocessorOptions: {
-      scss: {
-        additionalData: `@import "./src/assets/css/variables.css";`
-      }
-    }
-  },
   build: {
     outDir: 'dist',
     sourcemap: false,

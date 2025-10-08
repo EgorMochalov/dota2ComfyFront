@@ -77,7 +77,6 @@ export const useAuthStore = defineStore('auth', () => {
     // Инициализация при создании store
   const initialize = () => {
     token.value = authUtils.getToken()
-    user.value = authUtils.getUser()
   }
 
   // Вызываем инициализацию при создании store

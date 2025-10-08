@@ -10,21 +10,30 @@
     "preview:build": "vite build && vite preview"
   },
   "dependencies": {
-    "vue": "^3.3.11",
-    "vue-router": "^4.2.5",
-    "pinia": "^2.1.7",
+    "@element-plus/icons-vue": "^2.3.1",
     "axios": "^1.6.2",
-    "socket.io-client": "^4.7.4",
     "element-plus": "^2.4.4",
-    "@element-plus/icons-vue": "^2.3.1"
+    "js-cookie": "^3.0.5",
+    "pinia": "^2.1.7",
+    "socket.io-client": "^4.7.4",
+    "vue": "^3.3.11",
+    "vue-router": "^4.2.5"
   },
   "devDependencies": {
-    "vite": "^5.0.8",
+    "@types/js-cookie": "^3.0.6",
     "@vitejs/plugin-vue": "^4.5.2",
-    "terser": "^5.27.0"
+    "terser": "^5.27.0",
+    "vite": "^5.0.8"
   },
   "description": "Dota 2 Teammate Finder - платформа для поиска тиммейтов и команд",
-  "keywords": ["dota2", "teammate", "finder", "gaming", "vue", "websocket"],
+  "keywords": [
+    "dota2",
+    "teammate",
+    "finder",
+    "gaming",
+    "vue",
+    "websocket"
+  ],
   "author": "Dota 2 Teammate Finder Team",
   "license": "MIT"
 }

@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import { authAPI } from '../services/api'
 import { safeLocalStorage } from '../utils/errorHandler'
 import { ElMessage } from 'element-plus'
+import { authUtils } from '../utils/auth'
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref(safeLocalStorage.getItem('user'))
@@ -17,8 +18,7 @@ export const useAuthStore = defineStore('auth', () => {
       token.value = authToken
       user.value = userData
       
-      safeLocalStorage.setItem('authToken', authToken)
-      safeLocalStorage.setItem('user', userData)
+      authUtils.setAuthData(authToken, userData)
       
       ElMessage.success('Успешный вход!')
       return response.data
@@ -47,8 +47,7 @@ export const useAuthStore = defineStore('auth', () => {
     } finally {
       token.value = null
       user.value = null
-      safeLocalStorage.removeItem('authToken')
-      safeLocalStorage.removeItem('user')
+      authUtils.clearAuthData()
       ElMessage.success('Вы вышли из системы')
     }
   }
@@ -70,8 +69,19 @@ export const useAuthStore = defineStore('auth', () => {
 
   const updateUser = (userData) => {
     user.value = userData
-    safeLocalStorage.setItem('user', userData)
+    if (token.value) {
+      authUtils.setAuthData(token.value, userData)
+    }
   }
+
+    // Инициализация при создании store
+  const initialize = () => {
+    token.value = authUtils.getToken()
+    user.value = authUtils.getUser()
+  }
+
+  // Вызываем инициализацию при создании store
+  initialize()
 
   return {
     user,

@@ -659,6 +659,7 @@ export default {
       }
       searchResults.value = []
       searched.value = false
+      handleSearch()
     }
 
     const handleSort = (value) => {
@@ -1122,6 +1123,8 @@ export default {
   transition: var(--transition-normal);
   position: relative;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .player-card::before {
@@ -1314,6 +1317,7 @@ export default {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+  margin-top: auto;
 }
 
 .action-btn {

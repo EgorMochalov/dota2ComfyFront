@@ -60,5 +60,4 @@ export default defineConfig({
   optimizeDeps: {
     include: ['element-plus', '@element-plus/icons-vue']
   },
-  base: '/'
 })

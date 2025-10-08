@@ -1,10 +1,19 @@
 import axios from 'axios'
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
+// Динамическое определение базового URL
+const getBaseURL = () => {
+  if (import.meta.env.PROD) {
+    return import.meta.env.VITE_API_URL || 'https://your-backend-url.vercel.app/api'
+  }
+  return import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
+}
+
+const API_BASE_URL = getBaseURL()
 
 const api = axios.create({
   baseURL: API_BASE_URL,
   timeout: 10000,
+  withCredentials: true // Важно для CORS
 })
 
 // Интерцептор для добавления токена
@@ -28,12 +37,16 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       localStorage.removeItem('authToken')
       localStorage.removeItem('user')
-      window.location.href = '/login'
+      // Используем window.location для надежного редиректа
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login'
+      }
     }
     return Promise.reject(error)
   }
 )
 
+// Экспортируем API методы
 export const authAPI = {
   register: (data) => api.post('/auth/register', data),
   login: (data) => api.post('/auth/login', data),

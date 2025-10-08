@@ -32,7 +32,7 @@ export default defineConfig({
   css: {
     preprocessorOptions: {
       scss: {
-        additionalData: `@import "./src/style.css";`
+        additionalData: `@import "./src/assets/css/variables.css";`
       }
     }
   },
@@ -44,9 +44,17 @@ export default defineConfig({
       output: {
         manualChunks: {
           'element-plus': ['element-plus'],
-          'vue-vendor': ['vue', 'vue-router', 'pinia']
+          'vue-vendor': ['vue', 'vue-router', 'pinia'],
+          'icons': ['@element-plus/icons-vue']
         }
       }
     }
+  },
+  // Оптимизации для Vercel
+  optimizeDeps: {
+    include: ['vue', 'vue-router', 'pinia', 'element-plus']
+  },
+  define: {
+    'process.env': {}
   }
 })

@@ -7,29 +7,42 @@ class WebSocketService {
     this.eventHandlers = new Map()
   }
 
+  // Динамическое определение URL для WebSocket
+  getWebSocketURL() {
+    if (import.meta.env.PROD) {
+      return import.meta.env.VITE_WS_URL || 'https://your-backend-url.vercel.app'
+    }
+    return import.meta.env.VITE_WS_URL || 'http://localhost:5000'
+  }
+
   connect(token, user) {
     if (this.socket) {
       this.disconnect()
     }
 
-    this.socket = io(import.meta.env.VITE_WS_URL || 'http://localhost:5000', {
+    const wsUrl = this.getWebSocketURL()
+    
+    console.log('Connecting to WebSocket:', wsUrl)
+    
+    this.socket = io(wsUrl, {
       auth: {
         token,
         userId: user.id,
         username: user.username
-      }
+      },
+      transports: ['websocket', 'polling'] // Поддержка разных транспортов
     })
 
     this.socket.on('connect', () => {
       this.isConnected = true
-      console.log('WebSocket connected')
+      console.log('WebSocket connected successfully')
       this.socket.emit('subscribeToChats')
       this.socket.emit('subscribeToNotifications')
     })
 
-    this.socket.on('disconnect', () => {
+    this.socket.on('disconnect', (reason) => {
       this.isConnected = false
-      console.log('WebSocket disconnected')
+      console.log('WebSocket disconnected:', reason)
     })
 
     this.socket.on('connect_error', (error) => {
@@ -41,7 +54,6 @@ class WebSocketService {
   }
 
   setupDefaultHandlers() {
-    // Обработчики по умолчанию
     const defaultEvents = [
       'newMessage',
       'userTyping',
@@ -79,57 +91,48 @@ class WebSocketService {
   emitEvent(event, data) {
     if (this.eventHandlers.has(event)) {
       this.eventHandlers.get(event).forEach(handler => {
-        handler(data)
+        try {
+          handler(data)
+        } catch (error) {
+          console.error(`Error in event handler for ${event}:`, error)
+        }
       })
     }
   }
 
   // Методы для отправки событий
   joinChat(roomId) {
-    if (this.isConnected) {
+    if (this.isConnected && this.socket) {
       this.socket.emit('joinChat', { roomId })
     }
   }
 
   leaveChat(roomId) {
-    if (this.isConnected) {
+    if (this.isConnected && this.socket) {
       this.socket.emit('leaveChat', { roomId })
     }
   }
 
   sendTyping(roomId, isTyping) {
-    if (this.isConnected) {
+    if (this.isConnected && this.socket) {
       this.socket.emit('typing', { roomId, isTyping })
     }
   }
 
   markChatAsRead(roomId) {
-    if (this.isConnected) {
+    if (this.isConnected && this.socket) {
       this.socket.emit('markChatAsRead', { roomId })
     }
   }
 
   userActivity() {
-    if (this.isConnected) {
+    if (this.isConnected && this.socket) {
       this.socket.emit('userActivity')
-    }
-  }
-
-  subscribeToNotifications() {
-    if (this.isConnected) {
-      this.socket.emit('subscribeToNotifications')
-    }
-  }
-
-  unsubscribeFromNotifications() {
-    if (this.isConnected) {
-      this.socket.emit('unsubscribeFromNotifications')
     }
   }
 
   disconnect() {
     if (this.socket) {
-      this.unsubscribeFromNotifications()
       this.socket.disconnect()
       this.socket = null
       this.isConnected = false

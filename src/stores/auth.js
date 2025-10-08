@@ -1,11 +1,12 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { authAPI } from '../services/api'
+import { safeLocalStorage } from '../utils/errorHandler'
 import { ElMessage } from 'element-plus'
 
 export const useAuthStore = defineStore('auth', () => {
-  const user = ref(null)
-  const token = ref(localStorage.getItem('authToken'))
+  const user = ref(safeLocalStorage.getItem('user'))
+  const token = ref(safeLocalStorage.getItem('authToken'))
   const isAuthenticated = computed(() => !!token.value)
 
   const login = async (credentials) => {
@@ -16,8 +17,8 @@ export const useAuthStore = defineStore('auth', () => {
       token.value = authToken
       user.value = userData
       
-      localStorage.setItem('authToken', authToken)
-      localStorage.setItem('user', JSON.stringify(userData))
+      safeLocalStorage.setItem('authToken', authToken)
+      safeLocalStorage.setItem('user', userData)
       
       ElMessage.success('Успешный вход!')
       return response.data
@@ -46,8 +47,8 @@ export const useAuthStore = defineStore('auth', () => {
     } finally {
       token.value = null
       user.value = null
-      localStorage.removeItem('authToken')
-      localStorage.removeItem('user')
+      safeLocalStorage.removeItem('authToken')
+      safeLocalStorage.removeItem('user')
       ElMessage.success('Вы вышли из системы')
     }
   }
@@ -57,8 +58,8 @@ export const useAuthStore = defineStore('auth', () => {
     
     try {
       const response = await authAPI.getMe()
-      user.value = response.data.user
-      localStorage.setItem('user', JSON.stringify(response.data))
+      user.value = response.data
+      safeLocalStorage.setItem('user', response.data)
       return response.data
     } catch (error) {
       console.error('Get current user error:', error)
@@ -69,13 +70,7 @@ export const useAuthStore = defineStore('auth', () => {
 
   const updateUser = (userData) => {
     user.value = userData
-    localStorage.setItem('user', JSON.stringify(userData))
-  }
-
-  // Инициализация при загрузке
-  const storedUser = localStorage.getItem('user')
-  if (storedUser && token.value) {
-    user.value = JSON.parse(storedUser)
+    safeLocalStorage.setItem('user', userData)
   }
 
   return {

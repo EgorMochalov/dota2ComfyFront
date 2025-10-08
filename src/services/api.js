@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { authUtils } from '../utils/auth'
 
 // Динамическое определение базового URL
 const getBaseURL = () => {

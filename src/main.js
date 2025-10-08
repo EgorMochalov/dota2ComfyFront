@@ -52,8 +52,7 @@ const initializeApp = async () => {
   }
 }
 
+initializeApp().catch(console.error)
+
 // Монтируем приложение сразу, а инициализацию делаем асинхронно
 app.mount('#app')
-
-// Запускаем инициализацию
-initializeApp().catch(console.error)

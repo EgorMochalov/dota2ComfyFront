@@ -19,7 +19,7 @@
       </div>
     </div>
     <div class="footer-bottom">
-      <p>&copy; 2024 Dota 2 Teammate Finder. Все права защищены.</p>
+      <p>&copy; 2025 Dota 2 Teammate Finder. Все права защищены.</p>
     </div>
   </footer>
 </template>

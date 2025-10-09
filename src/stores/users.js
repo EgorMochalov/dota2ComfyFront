@@ -21,10 +21,9 @@ export const useUsersStore = defineStore('users', () => {
   const updateProfile = async (data) => {
     try {
       const response = await usersAPI.updateProfile(data)
-      console.log(data)
       currentUserProfile.value = response.data.user
       ElMessage.success('Профиль обновлен успешно!')
-      return response.data
+      return response.data.user
     } catch (error) {
       ElMessage.error(error.response?.data?.message || 'Ошибка обновления профиля')
       throw error

@@ -596,7 +596,6 @@ export default {
   margin: 0 auto;
   display: flex;
   justify-content: space-between;
-  align-items: center;
   gap: 40px;
 }
 
@@ -894,12 +893,12 @@ export default {
 }
 
 .chat-btn {
-  color: var(--primary-color);
+  color: var(--text-primary);
   font-size: 1.2rem;
 }
 
 .chat-btn:hover {
-  color: var(--primary-dark);
+  color: var(--text-dark);
   transform: scale(1.1);
 }
 

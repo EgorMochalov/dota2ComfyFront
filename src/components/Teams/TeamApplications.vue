@@ -48,7 +48,7 @@
                   <strong>Сообщение:</strong> {{ application.message }}
                 </div>
                 <div class="application-date">
-                  Подана: {{ formatDate(application.created_at) }}
+                  Подана: {{ formatDate(application.createdAt) }}
                 </div>
               </div>
             </div>

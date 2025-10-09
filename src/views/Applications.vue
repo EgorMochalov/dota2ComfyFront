@@ -15,8 +15,8 @@
             >
               <div class="application-content">
                 <div class="application-header">
-                  <h4 @click="$router.push(`/teams/${application.team.id}`)" class="team-name">
-                    {{ application.team?.name }}
+                  <h4 @click="$router.push(`/teams/${application.Team.id}`)" class="team-name">
+                    {{ application.Team?.name }}
                   </h4>
                   <el-tag :type="getStatusType(application.status)" size="small">
                     {{ getStatusText(application.status) }}
@@ -28,11 +28,11 @@
                 </p>
                 
                 <div class="application-team-info">
-                  <p><strong>Регион:</strong> {{ getRegionLabel(application.team?.region) }}</p>
-                  <p><strong>MMR диапазон:</strong> {{ application.team?.mmr_range_min }} - {{ application.team?.mmr_range_max }}</p>
+                  <p><strong>Регион:</strong> {{ getRegionLabel(application.Team?.region) }}</p>
+                  <p><strong>MMR диапазон:</strong> {{ application.Team?.mmr_range_min }} - {{ application.Team?.mmr_range_max }}</p>
                   <p><strong>Ищут роли:</strong>
                     <el-tag
-                      v-for="role in application.team?.required_roles"
+                      v-for="role in application.Team?.required_roles"
                       :key="role"
                       size="small"
                       style="margin-left: 5px;"
@@ -43,18 +43,18 @@
                 </div>
 
                 <p class="application-date">
-                  Подана: {{ formatDate(application.created_at) }}
+                  Подана: {{ formatDate(application.createdAt) }}
                 </p>
-              </div>
 
-              <div class="application-actions" v-if="application.status === 'pending'">
-                <el-button
-                  type="danger"
-                  size="small"
-                  @click="withdrawApplication(application)"
-                >
-                  Отозвать
-                </el-button>
+                <div class="application-actions" v-if="application.status === 'pending'">
+                  <el-button
+                    type="danger"
+                    size="small"
+                    @click="withdrawApplication(application)"
+                  >
+                    Отозвать
+                  </el-button>
+                </div>
               </div>
             </div>
           </div>
@@ -70,8 +70,8 @@
             >
               <div class="application-content">
                 <div class="application-header">
-                  <h4 @click="$router.push(`/teams/${application.team.id}`)" class="team-name">
-                    {{ application.team.name }}
+                  <h4 @click="$router.push(`/teams/${application.Team.id}`)" class="team-name">
+                    {{ application.Team?.name }}
                   </h4>
                   <el-tag :type="getStatusType(application.status)" size="small">
                     {{ getStatusText(application.status) }}
@@ -83,8 +83,8 @@
                 </p>
                 
                 <p class="application-date">
-                  {{ formatDate(application.created_at) }} • 
-                  Обновлено: {{ formatDate(application.updated_at) }}
+                  {{ formatDate(application.createdAt) }} • 
+                  Обновлено: {{ formatDate(application.updatedAt) }}
                 </p>
               </div>
             </div>
@@ -230,6 +230,8 @@ export default {
 
 .application-content {
   flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .application-header {
@@ -275,5 +277,6 @@ export default {
   display: flex;
   gap: 8px;
   margin-left: 15px;
+  margin-left: auto;
 }
 </style>

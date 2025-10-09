@@ -56,7 +56,7 @@
             <div class="notification-content">
               <div class="notification-title">{{ notification.title }}</div>
               <div class="notification-message">{{ notification.message }}</div>
-              <div class="notification-time">{{ formatTime(notification.created_at) }}</div>
+              <div class="notification-time">{{ formatTime(notification.createdAt) }}</div>
             </div>
 
             <div class="notification-status" v-if="!notification.is_read">
@@ -275,12 +275,16 @@ export default {
 
 .bell-button {
   padding: 8px;
-  border-radius: 50%;
+  border-radius: 100%;
+  width: 44px;
+  height: 44px;
   transition: background-color 0.3s;
+  color: rgb(56, 56, 56);
 }
 
 .bell-button:hover {
   background-color: rgba(255, 255, 255, 0.1);
+  color: rgba(56, 56, 56, 0.6);
 }
 
 :deep(.el-badge__content) {

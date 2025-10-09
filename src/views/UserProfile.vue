@@ -72,8 +72,8 @@
               :disabled="!user || user.id === authStore.user?.id"
               class="action-button chat-button"
             >
-              <el-icon><ChatDotRound /></el-icon>
               Написать
+              <el-icon><ChatDotRound /></el-icon>
             </el-button>
             
             <el-button 
@@ -83,8 +83,8 @@
               @click="inviteToTeam"
               class="action-button invite-button"
             >
-              <el-icon><User /></el-icon>
               Пригласить в команду
+              <el-icon><User /></el-icon>
             </el-button>
             
             <el-button 
@@ -94,8 +94,8 @@
               :disabled="!user || user.id === authStore.user?.id"
               class="action-button block-button"
             >
-              <el-icon><Close /></el-icon>
               Заблокировать
+              <el-icon><Close /></el-icon>
             </el-button>
           </div>
         </div>
@@ -105,85 +105,6 @@
     <!-- Основной контент -->
     <div class="profile-content">
       <div class="content-grid">
-        <!-- Левая колонка - Информация о пользователе -->
-        <div class="left-column">
-          <!-- Карточка команды -->
-          <el-card v-if="user?.team" class="info-card" shadow="hover">
-            <template #header>
-              <div class="card-header">
-                <h3>Команда</h3>
-                <el-icon><Star /></el-icon>
-              </div>
-            </template>
-            <div class="team-info" @click="$router.push(`/teams/${user.team.id}`)">
-              <el-avatar :size="60" :src="user.team.avatar_url" />
-              <div class="team-details">
-                <h4>{{ user.team.name }}</h4>
-                <p>{{ user.team.members?.length || 0 }}/5 участников</p>
-                <div class="team-captain" v-if="user.team.captain_id === user.id">
-                  <el-tag type="success" size="small">Капитан</el-tag>
-                </div>
-              </div>
-              <el-icon class="team-arrow"><ArrowRight /></el-icon>
-            </div>
-          </el-card>
-
-          <!-- Карточка контактов -->
-          <el-card class="info-card" shadow="hover">
-            <template #header>
-              <div class="card-header">
-                <h3>Контакт</h3>
-                <el-icon><Message /></el-icon>
-              </div>
-            </template>
-            <div class="contact-actions">
-              <el-button 
-                type="primary" 
-                class="contact-button"
-                @click="startChat(user?.id)"
-                :disabled="!user || user.id === authStore.user?.id"
-              >
-                <el-icon><ChatDotRound /></el-icon>
-                Начать чат
-              </el-button>
-              <el-button 
-                class="contact-button"
-                @click="viewSteamProfile"
-                v-if="user?.steam_id"
-              >
-                <el-icon><VideoPlay /></el-icon>
-                Steam профиль
-              </el-button>
-            </div>
-          </el-card>
-
-          <!-- Карточка активности -->
-          <el-card class="info-card" shadow="hover">
-            <template #header>
-              <div class="card-header">
-                <h3>Активность</h3>
-                <el-icon><DataLine /></el-icon>
-              </div>
-            </template>
-            <div class="activity-content">
-              <div class="activity-item">
-                <div class="activity-dot recent"></div>
-                <div class="activity-info">
-                  <span>Был в сети</span>
-                  <span class="activity-time">{{ getLastOnlineText(user?.last_online) }}</span>
-                </div>
-              </div>
-              <div class="activity-item">
-                <div class="activity-dot active"></div>
-                <div class="activity-info">
-                  <span>Активность</span>
-                  <span class="activity-time">Высокая</span>
-                </div>
-              </div>
-            </div>
-          </el-card>
-        </div>
-
         <!-- Центральная колонка - Основная информация -->
         <div class="center-column">
           <!-- О себе -->
@@ -305,55 +226,50 @@
 
         <!-- Правая колонка - Дополнительная информация -->
         <div class="right-column">
-          <!-- Быстрые действия -->
-          <el-card class="info-card actions-card" shadow="hover">
+          <el-card v-if="user?.team" class="info-card" shadow="hover">
             <template #header>
               <div class="card-header">
-                <h3>Действия</h3>
-                <el-icon><Lightning /></el-icon>
+                <h3>Команда</h3>
+                <el-icon><Star /></el-icon>
               </div>
             </template>
-            <div class="actions-content">
-              <el-button 
-                type="primary" 
-                class="action-button"
-                @click="startChat(user?.id)"
-                :disabled="!user || user.id === authStore.user?.id"
-              >
-                <el-icon><ChatDotRound /></el-icon>
-                Написать сообщение
-              </el-button>
-              
-              <el-button 
-                v-if="authStore.user?.team_id && !user?.team_id"
-                type="success"
-                class="action-button"
-                @click="inviteToTeam"
-              >
-                <el-icon><User /></el-icon>
-                Пригласить в команду
-              </el-button>
-              
-              <el-button 
-                class="action-button"
-                @click="$router.push('/players')"
-              >
-                <el-icon><Search /></el-icon>
-                Найти похожих
-              </el-button>
-              
-              <el-button 
-                type="danger"
-                class="action-button"
-                @click="blockUser"
-                :disabled="!user || user.id === authStore.user?.id"
-              >
-                <el-icon><Close /></el-icon>
-                Заблокировать
-              </el-button>
+            <div class="team-info" @click="$router.push(`/teams/${user.team.id}`)">
+              <el-avatar :size="60" :src="user.team.avatar_url" />
+              <div class="team-details">
+                <h4>{{ user.team.name }}</h4>
+                <p>{{ user.team.members?.length || 0 }}/5 участников</p>
+                <div class="team-captain" v-if="user.team.captain_id === user.id">
+                  <el-tag type="success" size="small">Капитан</el-tag>
+                </div>
+              </div>
+              <el-icon class="team-arrow"><ArrowRight /></el-icon>
             </div>
           </el-card>
-
+          <!-- Карточка активности -->
+          <el-card class="info-card" shadow="hover">
+            <template #header>
+              <div class="card-header">
+                <h3>Активность</h3>
+                <el-icon><DataLine /></el-icon>
+              </div>
+            </template>
+            <div class="activity-content">
+              <div class="activity-item">
+                <div class="activity-dot recent"></div>
+                <div class="activity-info">
+                  <span>Был в сети</span>
+                  <span class="activity-time">{{ getLastOnlineText(user?.last_online) }}</span>
+                </div>
+              </div>
+              <div class="activity-item">
+                <div class="activity-dot active"></div>
+                <div class="activity-info">
+                  <span>Активность</span>
+                  <span class="activity-time">Высокая</span>
+                </div>
+              </div>
+            </div>
+          </el-card>
           <!-- Совместимость -->
           <el-card class="info-card compatibility-card" shadow="hover">
             <template #header>
@@ -676,7 +592,7 @@ export default {
 /* Hero секция */
 .profile-hero {
   position: relative;
-  background: var(--secondary-gradient);
+  background: var(--success-gradient);
   padding: 60px 0 80px;
   overflow: hidden;
 }
@@ -818,7 +734,7 @@ export default {
 
 .content-grid {
   display: grid;
-  grid-template-columns: 300px 1fr 300px;
+  grid-template-columns: 1fr 300px;
   gap: 24px;
   align-items: start;
 }

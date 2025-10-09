@@ -7,7 +7,7 @@
           <h1 class="hero-title">Найдите идеальных тиммейтов для Dota 2</h1>
           <p class="hero-subtitle">Присоединяйтесь к сообществу игроков, находите команды и участвуйте в клановых войнах</p>
           <div class="hero-actions">
-            <el-button size="large" @click="$router.push('/players')" class="hero-btn">
+            <!-- <el-button size="large" @click="$router.push('/players')" class="hero-btn">
               Найти игроков
               <el-icon class="ml-3"><Search /></el-icon>
             </el-button>
@@ -18,7 +18,7 @@
             <el-button v-if="!authStore.user?.team_id" size="large" @click="$router.push('/teams?create=true')" class="hero-btn outline">
               Создать команду
               <el-icon class="ml-3"><Plus /></el-icon>
-            </el-button>
+            </el-button> -->
           </div>
         </div>
         <div class="hero-graphics">
@@ -64,7 +64,7 @@
       <div class="container">
         <div class="content-grid">
           <!-- Recommended Players -->
-          <div class="content-column main-column">
+          <!-- <div class="content-column main-column">
             <el-card class="featured-card">
               <template #header>
                 <div class="card-header">
@@ -138,10 +138,10 @@
                 </div>
               </div>
               <el-empty v-else description="Нет рекомендуемых игроков" />
-            </el-card>
+            </el-card> -->
 
             <!-- Active Teams -->
-            <el-card class="featured-card">
+            <!-- <el-card class="featured-card">
               <template #header>
                 <div class="card-header">
                   <h3>
@@ -213,12 +213,12 @@
               </div>
               <el-empty v-else description="Нет активных команд" />
             </el-card>
-          </div>
+          </div> -->
 
           <!-- Sidebar -->
-          <div class="content-column sidebar-column">
+          <!-- <div class="content-column sidebar-column"> -->
             <!-- My Team Card -->
-            <el-card class="sidebar-card" v-if="authStore.user?.team_id">
+            <!-- <el-card class="sidebar-card" v-if="authStore.user?.team_id">
               <template #header>
                 <h3>Моя команда</h3>
               </template>
@@ -243,10 +243,10 @@
                   </el-button>
                 </div>
               </div>
-            </el-card>
+            </el-card> -->
 
             <!-- Quick Actions -->
-            <el-card class="sidebar-card">
+            <!-- <el-card class="sidebar-card">
               <template #header>
                 <h3>Быстрые действия</h3>
               </template>
@@ -284,10 +284,10 @@
                   <el-icon><Plus /></el-icon>
                 </el-button>
               </div>
-            </el-card>
+            </el-card> -->
 
             <!-- Scrim Finder -->
-            <el-card class="sidebar-card scrim-finder">
+            <!-- <el-card class="sidebar-card scrim-finder">
               <template #header>
                 <h3>
                   <el-icon><Trophy /></el-icon>
@@ -322,8 +322,8 @@
                   </div>
                 </div>
               </div>
-            </el-card>
-          </div>
+            </el-card> -->
+          <!-- </div> -->
         </div>
       </div>
     </section>

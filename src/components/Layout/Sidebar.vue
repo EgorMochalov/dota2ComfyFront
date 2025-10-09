@@ -99,21 +99,6 @@
           </router-link>
         </div>
       </nav>
-
-      <!-- Статистика -->
-      <div class="sidebar-stats glass-effect">
-        <h4 class="stats-title">Статистика</h4>
-        <div class="stats-grid">
-          <div class="stat-item">
-            <div class="stat-value">{{ onlinePlayers }}</div>
-            <div class="stat-label">Игроков онлайн</div>
-          </div>
-          <div class="stat-item">
-            <div class="stat-value">{{ activeTeams }}</div>
-            <div class="stat-label">Команд в поиске</div>
-          </div>
-        </div>
-      </div>
     </div>
   </aside>
 </template>

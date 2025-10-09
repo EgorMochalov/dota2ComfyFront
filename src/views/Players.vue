@@ -1246,7 +1246,6 @@ export default {
   font-size: 0.7rem;
   font-weight: 600;
   color: white;
-  text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 

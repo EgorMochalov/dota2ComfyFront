@@ -32,7 +32,7 @@
             </p>
 
             <p class="invitation-date">
-              Получено: {{ formatDate(invitation.created_at) }}
+              Получено: {{ formatDate(invitation.createdAt) }}
             </p>
           </div>
 

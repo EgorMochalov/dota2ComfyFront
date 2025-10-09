@@ -60,9 +60,9 @@
     </section>
 
     <!-- Main Content -->
-    <section class="main-content">
+    <!-- <section class="main-content">
       <div class="container">
-        <div class="content-grid">
+        <div class="content-grid"> -->
           <!-- Recommended Players -->
           <!-- <div class="content-column main-column">
             <el-card class="featured-card">
@@ -324,9 +324,9 @@
               </div>
             </el-card> -->
           <!-- </div> -->
-        </div>
+        <!-- </div>
       </div>
-    </section>
+    </section> -->
 
     <!-- Application Dialog -->
     <el-dialog

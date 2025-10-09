@@ -202,6 +202,7 @@ body {
   border-radius: 20px;
   border: none;
   display: inline-flex;
+  
   font-weight: 500;
   box-shadow: var(--shadow-sm);
 }

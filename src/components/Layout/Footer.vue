@@ -160,7 +160,7 @@ export default {
 <style scoped>
 .footer {
   position: relative;
-  background: linear-gradient(135deg, var(--bg-primary) 0%, #1a1f2e 100%);
+  background: #1a1f2e;
   color: var(--text-primary);
   margin-top: auto;
   overflow: hidden;

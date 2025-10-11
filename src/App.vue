@@ -3,17 +3,16 @@
     <!-- Состояние загрузки -->
     <div v-if="appLoading" class="app-loading">
       <div class="loading-spinner">
-        <!-- Ваш лоадер здесь -->
         <p>Загрузка...</p>
       </div>
     </div>
 
     <!-- Для авторизованных пользователей показываем полный layout -->
     <div v-else-if="authStore.isAuthenticated" class="authenticated-layout">
-      <Header />
+      <Header @toggle-sidebar="toggleSidebar" />
       <div class="main-container">
-        <Sidebar />
-        <main class="main-content">
+        <Sidebar :mobileOpen="sidebarOpen" @close="closeSidebar" />
+        <main class="main-content" :class="{ 'main-content-blur': sidebarOpen && isMobile }">
           <router-view v-slot="{ Component }">
             <transition name="page" mode="out-in">
               <component :is="Component" />
@@ -36,7 +35,7 @@
 </template>
 
 <script>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useAuthStore } from './stores/auth'
 import Header from './components/Layout/Header.vue'
 import Sidebar from './components/Layout/Sidebar.vue'
@@ -52,10 +51,35 @@ export default {
   setup() {
     const authStore = useAuthStore()
     const appLoading = ref(true)
+    const sidebarOpen = ref(false)
+    const isMobile = ref(false)
+
+    const checkMobile = () => {
+      isMobile.value = window.innerWidth <= 768
+      if (!isMobile.value) {
+        sidebarOpen.value = false
+      }
+    }
+
+    const toggleSidebar = () => {
+      sidebarOpen.value = !sidebarOpen.value
+    }
+
+    const closeSidebar = () => {
+      sidebarOpen.value = false
+    }
+
+    // Закрываем сайдбар при изменении размера окна на десктоп
+    const handleResize = () => {
+      checkMobile()
+    }
 
     // При загрузке приложения проверяем авторизацию
     onMounted(async () => {
       try {
+        checkMobile()
+        window.addEventListener('resize', handleResize)
+        
         if (authStore.token) {
           await authStore.getCurrentUser()
         }
@@ -69,9 +93,17 @@ export default {
       }
     })
 
+    onUnmounted(() => {
+      window.removeEventListener('resize', handleResize)
+    })
+
     return {
       authStore,
-      appLoading
+      appLoading,
+      sidebarOpen,
+      isMobile,
+      toggleSidebar,
+      closeSidebar
     }
   }
 }
@@ -120,6 +152,7 @@ export default {
 .main-container {
   display: flex;
   flex: 1;
+  position: relative;
 }
 
 .main-content {
@@ -127,6 +160,11 @@ export default {
   padding: 20px;
   background-color: #f5f5f5;
   min-height: calc(100vh - 120px);
+  transition: filter 0.3s ease;
+}
+
+.main-content-blur {
+  filter: blur(2px);
 }
 
 .auth-layout {
@@ -175,5 +213,19 @@ export default {
 .authenticated-layout,
 .auth-layout {
   width: 100%;
+}
+
+/* Адаптивность для мобильных */
+@media (max-width: 768px) {
+  .main-content {
+    padding: 16px;
+    min-height: calc(100vh - 100px);
+  }
+}
+
+@media (max-width: 480px) {
+  .main-content {
+    padding: 12px;
+  }
 }
 </style>

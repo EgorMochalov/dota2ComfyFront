@@ -22,170 +22,186 @@
           <div class="filters-and-results">
             <!-- Боковая панель с фильтрами -->
             <div class="filters-sidebar">
-              <div class="filters-card">
-                <div class="filters-header">
-                  <h3>Фильтры</h3>
-                  <el-button 
-                    type="text" 
-                    @click="resetTeamsFilters" 
-                    class="reset-btn"
-                  >
-                    Сбросить все
-                  </el-button>
+              <!-- Кнопка для мобильных - показать/скрыть фильтры -->
+              <div class="mobile-filters-toggle" @click="showMobileFilters = !showMobileFilters">
+                <div class="toggle-content">
+                  <el-icon class="toggle-icon"><Filter /></el-icon>
+                  <div class="toggle-text">
+                    <span class="toggle-title">Фильтры</span>
+                    <span class="filters-count" v-if="activeTeamsFiltersCount > 0">
+                      {{ activeTeamsFiltersCount }} активных
+                    </span>
+                  </div>
                 </div>
-
-                <div class="filters-body">
-                  <!-- Регион -->
-                  <div class="filter-group">
-                    <label class="filter-label">Регион</label>
-                    <el-select
-                      v-model="filtersTeams.region"
-                      placeholder="Все регионы"
-                      clearable
-                      class="filter-select"
-                    >
-                      <el-option
-                        v-for="region in REGIONS"
-                        :key="region.value"
-                        :label="region.label"
-                        :value="region.value"
-                      />
-                    </el-select>
-                  </div>
-
-                  <!-- MMR диапазон -->
-                  <div class="filter-group">
-                    <label class="filter-label">MMR диапазон</label>
-                    <div class="range-inputs">
-                      <el-input-number
-                        v-model="filtersTeams.mmr_min"
-                        :min="0"
-                        :max="10000"
-                        placeholder="От"
-                        controls-position="right"
-                        class="range-input"
-                      />
-                      <span class="range-separator">—</span>
-                      <el-input-number
-                        v-model="filtersTeams.mmr_max"
-                        :min="0"
-                        :max="10000"
-                        placeholder="До"
-                        controls-position="right"
-                        class="range-input"
-                      />
-                    </div>
-                  </div>
-
-                  <!-- Режимы игры -->
-                  <div class="filter-group">
-                    <label class="filter-label">Режимы игры</label>
-                    <el-select
-                      v-model="filtersTeams.game_modes"
-                      multiple
-                      placeholder="Все режимы"
-                      clearable
-                      class="filter-select"
-                    >
-                      <el-option
-                        v-for="mode in GAME_MODES"
-                        :key="mode.value"
-                        :label="mode.label"
-                        :value="mode.value"
-                      />
-                    </el-select>
-                  </div>
-
-                  <!-- Ищут роли -->
-                  <div class="filter-group">
-                    <label class="filter-label">Ищут игроков на роли</label>
-                    <div class="roles-grid">
-                      <div
-                        v-for="role in ROLES"
-                        :key="role.value"
-                        class="role-option"
-                        :class="{ active: filtersTeams.required_roles.includes(role.value) }"
-                        @click="toggleTeamsRole(role.value)"
-                      >
-                        <div class="role-icon" :class="`role-${role.value}`">
-                          <el-icon><User /></el-icon>
-                        </div>
-                        <span class="role-label">{{ role.label }}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Теги -->
-                  <div class="filter-group">
-                    <label class="filter-label">Теги</label>
-                    <el-select
-                      v-model="filtersTeams.tags"
-                      multiple
-                      filterable
-                      allow-create
-                      default-first-option
-                      placeholder="Выберите теги"
-                      class="filter-select"
-                    >
-                      <el-option
-                        v-for="tag in TAGS"
-                        :key="tag"
-                        :label="tag"
-                        :value="tag"
-                      />
-                    </el-select>
-                  </div>
-
-                  <!-- Дополнительные фильтры -->
-                  <div class="filter-group">
-                    <label class="filter-label">Дополнительно</label>
-                    <div class="switch-filters">
-                      <div class="switch-item">
-                        <el-switch
-                          v-model="filtersTeams.is_searching"
-                          active-color="var(--primary-color)"
-                        />
-                        <span class="switch-label">Только в поиске</span>
-                      </div>
-                      <div class="switch-item">
-                        <el-switch
-                          v-model="filtersTeams.looking_for_scrim"
-                          active-color="var(--warning-color)"
-                        />
-                        <span class="switch-label">Ищут команды для кв</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <!-- Кнопка поиска -->
-                  <el-button
-                    type="primary"
-                    class="search-btn"
-                    @click="handleTeamsSearch"
-                    :loading="searchingTeams"
-                    :disabled="!hasActiveTeamsFilters"
-                  >
-                    <template #icon>
-                      <el-icon><Search /></el-icon>
-                    </template>
-                    Применить фильтры
-                  </el-button>
-                </div>
+                <el-icon :class="{ 'rotate-180': showMobileFilters }"><ArrowDown /></el-icon>
               </div>
 
-              <!-- Быстрый поиск -->
-              <div class="quick-search-card">
-                <h4>Быстрый поиск</h4>
-                <div class="quick-search-buttons">
-                  <el-button
-                    v-for="preset in teamsSearchPresets"
-                    :key="preset.name"
-                    type="text"
-                    class="quick-search-btn"
-                    @click="applyTeamsPreset(preset)"
-                  >
-                    {{ preset.name }}
-                  </el-button>
+              <div class="filters-container" :class="{ 'mobile-visible': showMobileFilters }">
+                <div class="filters-card">
+                  <div class="filters-header">
+                    <h3>Фильтры</h3>
+                    <el-button 
+                      type="text" 
+                      @click="resetTeamsFilters" 
+                      class="reset-btn"
+                    >
+                      Сбросить все
+                    </el-button>
+                  </div>
+
+                  <div class="filters-body">
+                    <!-- Регион -->
+                    <div class="filter-group">
+                      <label class="filter-label">Регион</label>
+                      <el-select
+                        v-model="filtersTeams.region"
+                        placeholder="Все регионы"
+                        clearable
+                        class="filter-select"
+                      >
+                        <el-option
+                          v-for="region in REGIONS"
+                          :key="region.value"
+                          :label="region.label"
+                          :value="region.value"
+                        />
+                      </el-select>
+                    </div>
+
+                    <!-- MMR диапазон -->
+                    <div class="filter-group">
+                      <label class="filter-label">MMR диапазон</label>
+                      <div class="range-inputs">
+                        <el-input-number
+                          v-model="filtersTeams.mmr_min"
+                          :min="0"
+                          :max="10000"
+                          placeholder="От"
+                          controls-position="right"
+                          class="range-input"
+                        />
+                        <span class="range-separator">—</span>
+                        <el-input-number
+                          v-model="filtersTeams.mmr_max"
+                          :min="0"
+                          :max="10000"
+                          placeholder="До"
+                          controls-position="right"
+                          class="range-input"
+                        />
+                      </div>
+                    </div>
+
+                    <!-- Режимы игры -->
+                    <div class="filter-group">
+                      <label class="filter-label">Режимы игры</label>
+                      <el-select
+                        v-model="filtersTeams.game_modes"
+                        multiple
+                        placeholder="Все режимы"
+                        clearable
+                        class="filter-select"
+                      >
+                        <el-option
+                          v-for="mode in GAME_MODES"
+                          :key="mode.value"
+                          :label="mode.label"
+                          :value="mode.value"
+                        />
+                      </el-select>
+                    </div>
+
+                    <!-- Ищут роли -->
+                    <div class="filter-group">
+                      <label class="filter-label">Ищут игроков на роли</label>
+                      <div class="roles-grid">
+                        <div
+                          v-for="role in ROLES"
+                          :key="role.value"
+                          class="role-option"
+                          :class="{ active: filtersTeams.required_roles.includes(role.value) }"
+                          @click="toggleTeamsRole(role.value)"
+                        >
+                          <div class="role-icon" :class="`role-${role.value}`">
+                            <el-icon><User /></el-icon>
+                          </div>
+                          <span class="role-label">{{ role.label }}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Теги -->
+                    <div class="filter-group">
+                      <label class="filter-label">Теги</label>
+                      <el-select
+                        v-model="filtersTeams.tags"
+                        multiple
+                        filterable
+                        allow-create
+                        default-first-option
+                        placeholder="Выберите теги"
+                        class="filter-select"
+                      >
+                        <el-option
+                          v-for="tag in TAGS"
+                          :key="tag"
+                          :label="tag"
+                          :value="tag"
+                        />
+                      </el-select>
+                    </div>
+
+                    <!-- Дополнительные фильтры -->
+                    <div class="filter-group">
+                      <label class="filter-label">Дополнительно</label>
+                      <div class="switch-filters">
+                        <div class="switch-item">
+                          <el-switch
+                            v-model="filtersTeams.is_searching"
+                            active-color="var(--primary-color)"
+                          />
+                          <span class="switch-label">Только в поиске</span>
+                        </div>
+                        <div class="switch-item">
+                          <el-switch
+                            v-model="filtersTeams.looking_for_scrim"
+                            active-color="var(--warning-color)"
+                          />
+                          <span class="switch-label">Ищут команды для кв</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Кнопка поиска -->
+                    <el-button
+                      type="primary"
+                      class="search-btn"
+                      @click="handleTeamsSearch"
+                      :loading="searchingTeams"
+                      :disabled="!hasActiveTeamsFilters"
+                    >
+                      <template #icon>
+                        <el-icon><Search /></el-icon>
+                      </template>
+                      Применить фильтры
+                    </el-button>
+                  </div>
+                </div>
+
+                <!-- Быстрый поиск -->
+                <div class="quick-search-card">
+                  <h4>Быстрый поиск</h4>
+                  <div class="quick-search-buttons">
+                    <el-button
+                      v-for="preset in teamsSearchPresets"
+                      :key="preset.name"
+                      type="text"
+                      class="quick-search-btn"
+                      @click="applyTeamsPreset(preset)"
+                    >
+                      {{ preset.name }}
+                    </el-button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -224,8 +240,16 @@
                 </div>
               </div>
 
+              <!-- Лоадер при загрузке -->
+              <div v-if="searchingTeams" class="loading-container">
+                <div class="loader-content">
+                  <el-icon class="loading-spinner" :size="48"><Loading /></el-icon>
+                  <p>Поиск команд...</p>
+                </div>
+              </div>
+
               <!-- Сетка команд -->
-              <div class="teams-grid">
+              <div v-else-if="teamsResults.length > 0" class="teams-grid">
                 <div
                   v-for="team in teamsResults"
                   :key="team.id"
@@ -372,7 +396,7 @@
               </div>
 
               <!-- Состояние пустых результатов -->
-              <div v-if="teamsResults.length === 0 && teamsSearched" class="empty-results">
+              <div v-else-if="teamsSearched && teamsResults.length === 0" class="empty-results">
                 <div class="empty-state">
                   <el-icon class="empty-icon"><Search /></el-icon>
                   <h4>Команды не найдены</h4>
@@ -382,241 +406,18 @@
                   </el-button>
                 </div>
               </div>
+
+              <!-- Начальное состояние (до поиска) -->
+              <div v-else class="initial-state">
+                <div class="initial-content">
+                  <el-icon class="initial-icon"><User /></el-icon>
+                  <h4>Начните поиск команд</h4>
+                  <p>Используйте фильтры, чтобы найти подходящие команды</p>
+                </div>
+              </div>
             </div>
           </div>
         </el-tab-pane>
-
-        <!-- Вкладка поиска команд для кв -->
-        <!-- <el-tab-pane label="Поиск команд для кв" name="scrims">
-          <div class="filters-and-results">
-            <div class="filters-sidebar">
-              <div class="filters-card">
-                <div class="filters-header">
-                  <h3>Фильтры для кв</h3>
-                  <el-button 
-                    type="text" 
-                    @click="resetScrimsFilters" 
-                    class="reset-btn"
-                  >
-                    Сбросить все
-                  </el-button>
-                </div>
-
-                <div class="filters-body">
-                  <div class="filter-group">
-                    <label class="filter-label">Регион</label>
-                    <el-select
-                      v-model="filtersScrims.region"
-                      placeholder="Все регионы"
-                      clearable
-                      class="filter-select"
-                    >
-                      <el-option
-                        v-for="region in REGIONS"
-                        :key="region.value"
-                        :label="region.label"
-                        :value="region.value"
-                      />
-                    </el-select>
-                  </div>
-
-                  <div class="filter-group">
-                    <label class="filter-label">MMR от</label>
-                    <el-input-number
-                      v-model="filtersScrims.mmr_min"
-                      :min="0"
-                      :max="10000"
-                      placeholder="Минимальный MMR"
-                      controls-position="right"
-                      class="range-input"
-                    />
-                  </div>
-
-                  <div class="filter-group">
-                    <label class="filter-label">Режимы игры</label>
-                    <el-select
-                      v-model="filtersScrims.game_modes"
-                      multiple
-                      placeholder="Все режимы"
-                      clearable
-                      class="filter-select"
-                    >
-                      <el-option
-                        v-for="mode in GAME_MODES"
-                        :key="mode.value"
-                        :label="mode.label"
-                        :value="mode.value"
-                      />
-                    </el-select>
-                  </div>
-
-                  <el-button
-                    type="warning"
-                    class="search-btn"
-                    @click="handleScrimsSearch"
-                    :loading="searchingScrims"
-                    :disabled="!hasActiveScrimsFilters"
-                  >
-                    <template #icon>
-                      <el-icon><Search /></el-icon>
-                    </template>
-                    Найти команды для кв
-                  </el-button>
-                </div>
-              </div>
-            </div>
-
-            <div class="results-area">
-              <div class="results-header">
-                <div class="results-info">
-                  <h3>Найдено команд для кв: {{ scrimsResults.length }}</h3>
-                  <div class="active-filters" v-if="activeScrimsFiltersCount > 0">
-                    <el-tag
-                      v-for="filter in activeScrimsFiltersList"
-                      :key="filter.key"
-                      closable
-                      @close="removeScrimsFilter(filter.key)"
-                      class="active-filter-tag"
-                    >
-                      {{ filter.label }}
-                    </el-tag>
-                  </div>
-                </div>
-                <div class="results-controls">
-                  <el-select
-                    v-model="sortByScrims"
-                    placeholder="Сортировка"
-                    @change="handleScrimsSort"
-                    class="sort-select"
-                  >
-                    <el-option label="По MMR (убывание)" value="mmr_desc" />
-                    <el-option label="По MMR (возрастание)" value="mmr_asc" />
-                    <el-option label="По названию (А-Я)" value="name_asc" />
-                    <el-option label="По названию (Я-А)" value="name_desc" />
-                  </el-select>
-                </div>
-              </div>
-
-              <div class="teams-grid">
-                <div
-                  v-for="team in scrimsResults"
-                  :key="team.id"
-                  class="team-card scrim-card"
-                >
-                  <div class="team-header">
-                    <div class="team-avatar">
-                      <el-avatar :size="64" :src="team.avatar_url" />
-                      <div class="team-badges">
-                        <el-tag type="warning" size="small" class="scrim-badge">
-                          КВ
-                        </el-tag>
-                      </div>
-                    </div>
-                    <div class="team-main-info">
-                      <h4 
-                        @click="$router.push(`/teams/${team.id}`)" 
-                        class="team-name"
-                      >
-                        {{ team.name }}
-                      </h4>
-                      <div class="team-meta">
-                        <span class="team-mmr">
-                          <el-icon><TrendCharts /></el-icon>
-                          {{ team.mmr_range_min }} - {{ team.mmr_range_max }} MMR
-                        </span>
-                        <span class="team-region">
-                          <el-icon><Location /></el-icon>
-                          {{ getRegionLabel(team.region) }}
-                        </span>
-                        <span class="team-size">
-                          <el-icon><User /></el-icon>
-                          {{ team.members?.length || 0 }}/5
-                        </span>
-                      </div>
-                    </div>
-                    <div class="team-status">
-                      <el-tag type="warning" class="status-tag">
-                        Ищет кв
-                      </el-tag>
-                    </div>
-                  </div>
-
-                  <div class="team-description" v-if="team.description">
-                    <p>{{ truncateText(team.description, 100) }}</p>
-                  </div>
-
-                  <div class="team-modes" v-if="team.game_modes && team.game_modes.length">
-                    <div class="modes-label">Режимы для кв:</div>
-                    <div class="modes-list">
-                      <el-tag
-                        v-for="mode in team.game_modes"
-                        :key="mode"
-                        size="small"
-                        class="mode-tag"
-                      >
-                        {{ getGameModeLabel(mode) }}
-                      </el-tag>
-                    </div>
-                  </div>
-
-                  <div class="team-composition">
-                    <div class="composition-label">Состав команды:</div>
-                    <div class="members-preview">
-                      <div 
-                        v-for="member in team.members?.slice(0, 3)" 
-                        :key="member.id"
-                        class="member-preview"
-                        @click="$router.push(`/users/${member.id}`)"
-                      >
-                        <el-avatar :size="24" :src="member.avatar_url" />
-                        <span class="member-name">{{ member.username }}</span>
-                      </div>
-                      <div 
-                        v-if="team.members && team.members.length > 3" 
-                        class="more-members"
-                      >
-                        +{{ team.members.length - 3 }}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="team-actions">
-                    <el-button
-                      type="primary"
-                      size="small"
-                      @click="$router.push(`/teams/${team.id}`)"
-                      class="action-btn"
-                    >
-                      <el-icon><View /></el-icon>
-                      Подробнее
-                    </el-button>
-                    <el-button
-                      type="warning"
-                      size="small"
-                      @click="contactForScrim(team)"
-                      :disabled="!authStore.user?.team_id"
-                      class="action-btn"
-                    >
-                      <el-icon><ChatDotRound /></el-icon>
-                      Написать о кв
-                    </el-button>
-                  </div>
-                </div>
-              </div>
-
-              <div v-if="scrimsResults.length === 0 && scrimsSearched" class="empty-results">
-                <div class="empty-state">
-                  <el-icon class="empty-icon"><Search /></el-icon>
-                  <h4>Команды для кв не найдены</h4>
-                  <p>Попробуйте изменить параметры поиска или сбросить фильтры</p>
-                  <el-button type="warning" @click="resetScrimsFilters">
-                    Сбросить фильтры
-                  </el-button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </el-tab-pane> -->
 
         <!-- Вкладка создания команды -->
         <el-tab-pane label="Создать команду" name="create" v-if="!authStore.user?.team_id">
@@ -675,7 +476,10 @@ import {
   View,
   Plus,
   TrendCharts,
-  Location
+  Location,
+  Filter,
+  ArrowDown,
+  Loading
 } from '@element-plus/icons-vue'
 
 export default {
@@ -688,7 +492,10 @@ export default {
     View,
     Plus,
     TrendCharts,
-    Location
+    Location,
+    Filter,
+    ArrowDown,
+    Loading
   },
   setup() {
     const route = useRoute()
@@ -699,6 +506,7 @@ export default {
     const chatStore = useChatStore()
 
     const activeTab = ref(route.query.create ? 'create' : 'teams')
+    const showMobileFilters = ref(false)
 
     // Фильтры для поиска команд
     const filtersTeams = ref({
@@ -712,21 +520,10 @@ export default {
       looking_for_scrim: false
     })
 
-    // Фильтры для поиска кв
-    const filtersScrims = ref({
-      region: '',
-      game_modes: [],
-      mmr_min: null
-    })
-
     const teamsResults = ref([])
-    const scrimsResults = ref([])
     const searchingTeams = ref(false)
-    const searchingScrims = ref(false)
     const teamsSearched = ref(false)
-    const scrimsSearched = ref(false)
     const sortByTeams = ref('mmr_desc')
-    const sortByScrims = ref('mmr_desc')
     const applyDialogVisible = ref(false)
     const applying = ref(false)
     const selectedTeam = ref(null)
@@ -755,32 +552,8 @@ export default {
       }
     ])
 
-    // Пресеты для быстрого поиска кв
-    const scrimsSearchPresets = ref([
-      {
-        name: 'Высокий MMR',
-        filters: { mmr_min: 5000 }
-      },
-      {
-        name: 'Капитанский режим',
-        filters: { game_modes: ['captains_mode'] }
-      },
-      {
-        name: 'Ранкед',
-        filters: { game_modes: ['ranked'] }
-      }
-    ])
-
     const hasActiveTeamsFilters = computed(() => {
       return Object.values(filtersTeams.value).some(value => {
-        if (Array.isArray(value)) return value.length > 0
-        if (typeof value === 'number') return value !== null
-        return !!value
-      })
-    })
-
-    const hasActiveScrimsFilters = computed(() => {
-      return Object.values(filtersScrims.value).some(value => {
         if (Array.isArray(value)) return value.length > 0
         if (typeof value === 'number') return value !== null
         return !!value
@@ -790,18 +563,6 @@ export default {
     const activeTeamsFiltersCount = computed(() => {
       let count = 0
       Object.entries(filtersTeams.value).forEach(([key, value]) => {
-        if (Array.isArray(value)) {
-          count += value.length
-        } else if (value !== null && value !== '' && value !== false) {
-          count++
-        }
-      })
-      return count
-    })
-
-    const activeScrimsFiltersCount = computed(() => {
-      let count = 0
-      Object.entries(filtersScrims.value).forEach(([key, value]) => {
         if (Array.isArray(value)) {
           count += value.length
         } else if (value !== null && value !== '' && value !== false) {
@@ -857,33 +618,6 @@ export default {
 
       if (filtersTeams.value.looking_for_scrim) {
         active.push({ key: 'looking_for_scrim', label: 'Ищут кв' })
-      }
-
-      return active
-    })
-
-    const activeScrimsFiltersList = computed(() => {
-      const active = []
-      
-      if (filtersScrims.value.region) {
-        active.push({
-          key: 'region',
-          label: `Регион: ${getRegionLabel(filtersScrims.value.region)}`
-        })
-      }
-
-      if (filtersScrims.value.mmr_min) {
-        active.push({
-          key: 'mmr_min',
-          label: `MMR от: ${filtersScrims.value.mmr_min}`
-        })
-      }
-
-      if (filtersScrims.value.game_modes.length > 0) {
-        active.push({
-          key: 'game_modes',
-          label: `Режимы: ${filtersScrims.value.game_modes.length}`
-        })
       }
 
       return active
@@ -946,34 +680,15 @@ export default {
       handleTeamsSearch()
     }
 
-    const removeScrimsFilter = (filterKey) => {
-      switch (filterKey) {
-        case 'region':
-          filtersScrims.value.region = ''
-          break
-        case 'mmr_min':
-          filtersScrims.value.mmr_min = null
-          break
-        case 'game_modes':
-          filtersScrims.value.game_modes = []
-          break
-      }
-      handleScrimsSearch()
-    }
-
     const applyTeamsPreset = (preset) => {
       filtersTeams.value = { ...filtersTeams.value, ...preset.filters }
       handleTeamsSearch()
     }
 
-    const applyScrimsPreset = (preset) => {
-      filtersScrims.value = { ...filtersScrims.value, ...preset.filters }
-      handleScrimsSearch()
-    }
-
     const handleTeamsSearch = async () => {
       searchingTeams.value = true
       teamsSearched.value = true
+      showMobileFilters.value = false
       
       try {
         // Очищаем пустые параметры
@@ -995,29 +710,6 @@ export default {
       }
     }
 
-    const handleScrimsSearch = async () => {
-      searchingScrims.value = true
-      scrimsSearched.value = true
-      
-      try {
-        const params = {}
-        Object.keys(filtersScrims.value).forEach(key => {
-          const value = filtersScrims.value[key]
-          if (value !== null && value !== '' && (!Array.isArray(value) || value.length > 0)) {
-            params[key] = value
-          }
-        })
-
-        await teamsStore.searchScrims(params)
-        scrimsResults.value = teamsStore.scrimResults
-      } catch (error) {
-        console.error('Search scrims error:', error)
-        ElMessage.error('Ошибка поиска команд для кв')
-      } finally {
-        searchingScrims.value = false
-      }
-    }
-
     const resetTeamsFilters = () => {
       filtersTeams.value = {
         region: '',
@@ -1031,16 +723,7 @@ export default {
       }
       teamsResults.value = []
       teamsSearched.value = false
-    }
-
-    const resetScrimsFilters = () => {
-      filtersScrims.value = {
-        region: '',
-        game_modes: [],
-        mmr_min: null
-      }
-      scrimsResults.value = []
-      scrimsSearched.value = false
+      handleTeamsSearch()
     }
 
     const handleTeamsSort = (value) => {
@@ -1059,23 +742,6 @@ export default {
           break
         case 'size':
           teamsResults.value.sort((a, b) => (b.members?.length || 0) - (a.members?.length || 0))
-          break
-      }
-    }
-
-    const handleScrimsSort = (value) => {
-      switch (value) {
-        case 'mmr_desc':
-          scrimsResults.value.sort((a, b) => (b.mmr_range_min || 0) - (a.mmr_range_min || 0))
-          break
-        case 'mmr_asc':
-          scrimsResults.value.sort((a, b) => (a.mmr_range_min || 0) - (b.mmr_range_min || 0))
-          break
-        case 'name_asc':
-          scrimsResults.value.sort((a, b) => a.name.localeCompare(b.name))
-          break
-        case 'name_desc':
-          scrimsResults.value.sort((a, b) => b.name.localeCompare(a.name))
           break
       }
     }
@@ -1141,41 +807,28 @@ export default {
       TAGS,
       activeTab,
       filtersTeams,
-      filtersScrims,
       teamsResults,
-      scrimsResults,
       searchingTeams,
-      searchingScrims,
       teamsSearched,
-      scrimsSearched,
       sortByTeams,
-      sortByScrims,
       applyDialogVisible,
       applying,
       applicationForm,
       teamsSearchPresets,
-      scrimsSearchPresets,
       hasActiveTeamsFilters,
-      hasActiveScrimsFilters,
       activeTeamsFiltersCount,
-      activeScrimsFiltersCount,
       activeTeamsFiltersList,
-      activeScrimsFiltersList,
+      showMobileFilters,
       getRegionLabel,
       getGameModeLabel,
       getRoleLabel,
       truncateText,
       toggleTeamsRole,
       removeTeamsFilter,
-      removeScrimsFilter,
       applyTeamsPreset,
-      applyScrimsPreset,
       handleTeamsSearch,
-      handleScrimsSearch,
       resetTeamsFilters,
-      resetScrimsFilters,
       handleTeamsSort,
-      handleScrimsSort,
       applyToTeam,
       submitApplication,
       contactForScrim,
@@ -1313,6 +966,72 @@ export default {
 
 /* Боковая панель с фильтрами */
 .filters-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Улучшенная кнопка фильтров для мобильных */
+.mobile-filters-toggle {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: var(--bg-card);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: var(--transition-normal);
+  margin-bottom: 0;
+}
+
+.mobile-filters-toggle:hover {
+  background: var(--bg-secondary);
+  transform: translateY(-1px);
+}
+
+.toggle-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.toggle-icon {
+  color: var(--primary-color);
+  font-size: 1.2rem;
+}
+
+.toggle-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.toggle-title {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 1rem;
+}
+
+.filters-count {
+  font-size: 0.8rem;
+  color: var(--primary-color);
+  font-weight: 500;
+  background: rgba(102, 126, 234, 0.1);
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+.mobile-filters-toggle .rotate-180 {
+  transform: rotate(180deg);
+  transition: transform var(--transition-normal);
+  color: var(--text-muted);
+}
+
+.filters-container {
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -1471,6 +1190,7 @@ export default {
 .search-btn {
   width: 100%;
   margin-top: 8px;
+  background: var(--primary-gradient);
   border: none;
   border-radius: var(--border-radius);
   padding: 12px 20px;
@@ -1572,10 +1292,44 @@ export default {
   border: 1px solid var(--border-color);
 }
 
+/* Лоадер */
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  background: var(--bg-card);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border-color);
+}
+
+.loader-content {
+  text-align: center;
+  padding: 40px;
+}
+
+.loading-spinner {
+  color: var(--primary-color);
+  margin-bottom: 16px;
+  animation: spin 1.5s linear infinite;
+}
+
+.loader-content p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
 /* Сетка команд */
 .teams-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
   gap: 20px;
 }
 
@@ -1611,11 +1365,11 @@ export default {
   opacity: 1;
 }
 
-.team-card.scrim-card {
+.team-card.scrim-team {
   border-left: 4px solid var(--warning-color);
 }
 
-.team-card.scrim-card::before {
+.team-card.scrim-team::before {
   background: var(--warning-gradient);
 }
 
@@ -1784,57 +1538,6 @@ export default {
   font-weight: 500;
 }
 
-/* Состав команды (для кв) */
-.team-composition {
-  margin-bottom: 16px;
-  padding: 12px;
-  background: var(--bg-secondary);
-  border-radius: var(--border-radius-sm);
-}
-
-.composition-label {
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--text-muted);
-  margin-bottom: 8px;
-}
-
-.members-preview {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.member-preview {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 8px;
-  background: var(--bg-card);
-  border-radius: 16px;
-  cursor: pointer;
-  transition: var(--transition-fast);
-  border: 1px solid var(--border-color);
-}
-
-.member-preview:hover {
-  border-color: var(--primary-color);
-  transform: translateY(-1px);
-}
-
-.member-name {
-  font-size: 0.7rem;
-  font-weight: 500;
-  color: var(--text-primary);
-}
-
-.more-members {
-  font-size: 0.7rem;
-  color: var(--text-muted);
-  font-weight: 500;
-}
-
 /* Действия */
 .team-actions {
   display: flex;
@@ -1863,31 +1566,40 @@ export default {
 }
 
 /* Пустые результаты */
-.empty-results {
+.empty-results,
+.initial-state {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 400px;
+  background: var(--bg-card);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border-color);
 }
 
-.empty-state {
+.empty-state,
+.initial-content {
   text-align: center;
   padding: 40px;
 }
 
-.empty-icon {
+.empty-icon,
+.initial-icon {
   font-size: 4rem;
   color: var(--border-color);
   margin-bottom: 20px;
 }
 
-.empty-state h4 {
+.empty-state h4,
+.initial-content h4 {
   margin: 0 0 8px 0;
   color: var(--text-primary);
   font-size: 1.2rem;
 }
 
-.empty-state p {
+.empty-state p,
+.initial-content p {
   margin: 0 0 20px 0;
   color: var(--text-muted);
 }
@@ -1923,19 +1635,45 @@ export default {
   border-top: 1px solid var(--border-color);
 }
 
-/* Адаптивность */
+/* ===== АДАПТИВНОСТЬ ===== */
+
+/* Большие экраны (1400px+) */
+@media (min-width: 1400px) {
+  .teams-grid {
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  }
+}
+
+/* Ноутбуки (1200px - 1024px) */
+@media (max-width: 1200px) {
+  .filters-and-results {
+    grid-template-columns: 280px 1fr;
+    gap: 20px;
+  }
+  
+  .teams-grid {
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  }
+  
+  .filters-card {
+    padding: 20px;
+  }
+}
+
+/* Планшеты (1024px и меньше) - ФИЛЬТРЫ СВЕРХУ */
 @media (max-width: 1024px) {
   .filters-and-results {
     grid-template-columns: 1fr;
     gap: 20px;
   }
   
+  /* Фильтры теперь сверху */
   .filters-sidebar {
-    order: 2;
+    order: 1;
   }
   
   .results-area {
-    order: 1;
+    order: 2;
   }
   
   .header-stats {
@@ -1947,8 +1685,28 @@ export default {
   .stat-item {
     display: inline-block;
   }
+  
+  /* Улучшенная кнопка фильтров */
+  .mobile-filters-toggle {
+    display: flex;
+    margin-bottom: 0;
+  }
+  
+  .filters-container {
+    display: none;
+  }
+  
+  .filters-container.mobile-visible {
+    display: flex;
+  }
+  
+  /* На планшетах минимум 2 карточки в строке */
+  .teams-grid {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  }
 }
 
+/* Мобильные устройства (768px и меньше) */
 @media (max-width: 768px) {
   .page-header {
     padding: 30px 0;
@@ -1959,16 +1717,19 @@ export default {
   }
   
   .teams-content {
-    padding: 20px 15px;
+    padding: 15px;
   }
   
-  .results-header {
-    flex-direction: column;
-    gap: 15px;
-  }
-  
+  /* На мобильных - 1 карточка в строке, занимает всю ширину */
   .teams-grid {
     grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .team-card {
+    margin: 0;
+    width: 100%;
+    max-width: none;
   }
   
   .roles-grid {
@@ -1978,17 +1739,73 @@ export default {
   .team-header {
     flex-direction: column;
     text-align: center;
+    align-items: center;
   }
   
   .team-actions {
-    justify-content: center;
+    justify-content: stretch;
   }
   
-  .creation-container {
-    padding: 20px;
+  .action-btn {
+    flex: 1;
+    min-width: 0;
   }
 }
 
+/* Средние мобильные (600px - 480px) */
+@media (max-width: 600px) {
+  .page-header {
+    padding: 25px 0;
+  }
+  
+  .page-title {
+    font-size: 1.8rem;
+  }
+  
+  .page-subtitle {
+    font-size: 1rem;
+  }
+  
+  .teams-content {
+    padding: 12px;
+    gap: 15px;
+  }
+  
+  .filters-card,
+  .quick-search-card {
+    padding: 16px;
+  }
+  
+  .results-header {
+    padding: 16px 20px;
+  }
+  
+  .team-card {
+    padding: 20px;
+  }
+
+  .results-header {
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .range-inputs {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .range-separator {
+    display: none;
+  }
+  
+  /* На средних мобильных карточка занимает всю доступную ширину */
+  .team-card {
+    margin: 0;
+    width: 100%;
+  }
+}
+
+/* Маленькие мобильные (480px - 360px) */
 @media (max-width: 480px) {
   .page-header {
     padding: 20px 0;
@@ -1998,19 +1815,153 @@ export default {
     font-size: 1.5rem;
   }
   
+  .header-content {
+    padding: 0 15px;
+  }
+  
   .teams-content {
-    padding: 15px 10px;
-    gap: 15px;
+    padding: 10px;
   }
   
   .filters-card,
   .quick-search-card {
-    padding: 20px;
+    padding: 12px;
   }
   
-  :deep(.page-tabs .el-tabs__item) {
-    padding: 15px 12px;
+  .team-card {
+    padding: 16px;
+    margin: 0;
+    width: 100%;
+  }
+  
+  .team-actions {
+    flex-direction: row;
+  }
+  
+  .action-btn {
+    min-width: 0;
+    flex: 1;
+  }
+  
+  .empty-state,
+  .initial-content {
+    padding: 30px 20px;
+  }
+  
+  .empty-icon,
+  .initial-icon {
+    font-size: 3rem;
+  }
+  
+  /* Улучшаем отображение кнопки фильтров на маленьких экранах */
+  .mobile-filters-toggle {
+    padding: 14px 16px;
+  }
+  
+  .toggle-icon {
+    font-size: 1.1rem;
+  }
+  
+  .toggle-title {
+    font-size: 0.95rem;
+  }
+  
+  .filters-count {
+    font-size: 0.75rem;
+  }
+}
+
+/* Очень маленькие мобильные (< 360px) */
+@media (max-width: 360px) {
+  .page-title {
+    font-size: 1.3rem;
+  }
+  
+  .teams-content {
+    padding: 8px;
+  }
+  
+  .team-card {
+    padding: 12px;
+    margin: 0;
+    width: 100%;
+  }
+  
+  .roles-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .quick-search-buttons {
+    gap: 6px;
+  }
+  
+  .quick-search-btn {
+    padding: 6px 10px;
     font-size: 0.9rem;
+  }
+  
+  /* На очень маленьких экранах улучшаем отображение контента */
+  .team-header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  
+  .team-status {
+    margin-top: 8px;
+  }
+  
+  /* Еще более компактная кнопка фильтров */
+  .mobile-filters-toggle {
+    padding: 12px 14px;
+  }
+  
+  .toggle-content {
+    gap: 10px;
+  }
+  
+  .toggle-icon {
+    font-size: 1rem;
+  }
+}
+
+/* Ландшафтная ориентация для мобильных */
+@media (max-height: 500px) and (max-width: 900px) {
+  .page-header {
+    padding: 20px 0;
+  }
+  
+  .teams-content {
+    padding: 15px;
+  }
+  
+  .filters-container.mobile-visible {
+    max-height: 70vh;
+    overflow-y: auto;
+  }
+}
+
+/* Высокие экраны */
+@media (min-height: 800px) and (max-width: 768px) {
+  .empty-results,
+  .initial-state,
+  .loading-container {
+    min-height: 500px;
+  }
+}
+
+/* Улучшение доступности */
+@media (prefers-reduced-motion: reduce) {
+  .team-card,
+  .action-btn,
+  .search-btn,
+  .role-option,
+  .mobile-filters-toggle {
+    transition: none;
+  }
+  
+  .loading-spinner {
+    animation: none;
   }
 }
 </style>

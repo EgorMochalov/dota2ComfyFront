@@ -192,10 +192,10 @@
               </el-icon>
             </div>
           </div>
-          <div class="form-hint">
-            Выберите роли, на которые вы ищете игроков. Можно выбрать несколько ролей.
-          </div>
         </el-form-item>
+        <div class="form-hint mb-3">
+          Выберите роли, на которые вы ищете игроков. Можно выбрать несколько ролей.
+        </div>
 
         <el-form-item label="Теги команды" prop="tags" class="enhanced-form-item">
           <el-select
@@ -353,18 +353,9 @@ export default {
       'evening'
     ])
 
-    const showPreview = computed(() => {
-      return teamForm.value.name || teamForm.value.description || teamForm.value.region
-    })
-
     const showMmrPreview = computed(() => {
       return teamForm.value.mmr_range_min !== null || teamForm.value.mmr_range_max !== null
     })
-
-    const getRegionLabel = (regionValue) => {
-      const region = REGIONS.find(r => r.value === regionValue)
-      return region ? region.label : regionValue
-    }
 
     const getRoleDescription = (role) => {
       const descriptions = {
@@ -445,9 +436,7 @@ export default {
       teamRules,
       gameModeGroups,
       popularTags,
-      showPreview,
       showMmrPreview,
-      getRegionLabel,
       getRoleDescription,
       toggleRole,
       removeTag,
@@ -469,41 +458,17 @@ export default {
 </script>
 
 <style scoped>
-.form-header {
-  text-align: center;
-  margin-bottom: 40px;
-  padding: 30px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 15px;
-  color: white;
-}
-
-.header-icon {
-  margin-bottom: 15px;
-}
-
-.form-header h2 {
-  margin: 0 0 10px 0;
-  font-size: 2rem;
-  font-weight: 700;
-}
-
-.form-header p {
-  margin: 0;
-  opacity: 0.9;
-  font-size: 1.1rem;
-}
-
 .form-section {
   margin-bottom: 24px;
   border-radius: 12px;
-  border: 1px solid #e4e7ed;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-md);
   transition: all 0.3s ease;
+  background: var(--bg-card);
 }
 
 .form-section:hover {
-  box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-lg);
 }
 
 .section-header {
@@ -511,11 +476,12 @@ export default {
   align-items: center;
   gap: 10px;
   font-weight: 600;
-  color: #2c3e50;
+  color: var(--text-primary);
+  font-size: 1.1rem;
 }
 
 .section-header .el-icon {
-  color: #3498db;
+  color: var(--primary-color);
 }
 
 .enhanced-form-item {
@@ -524,7 +490,7 @@ export default {
 
 .enhanced-form-item :deep(.el-form-item__label) {
   font-weight: 600;
-  color: #2c3e50;
+  color: var(--text-primary);
   margin-bottom: 8px;
   font-size: 1rem;
 }
@@ -532,7 +498,7 @@ export default {
 .form-hint {
   margin-top: 8px;
   font-size: 0.85rem;
-  color: #7f8c8d;
+  color: var(--text-muted);
   line-height: 1.4;
 }
 
@@ -545,6 +511,7 @@ export default {
 
 .region-name {
   font-weight: 500;
+  color: var(--text-primary);
 }
 
 .mmr-range {
@@ -568,12 +535,12 @@ export default {
 
 .mmr-input-group label {
   font-size: 0.85rem;
-  color: #7f8c8d;
+  color: var(--text-muted);
   font-weight: 500;
 }
 
 .mmr-separator {
-  color: #bdc3c7;
+  color: var(--text-muted);
   font-weight: bold;
   padding: 0 8px;
 }
@@ -583,19 +550,19 @@ export default {
   align-items: center;
   gap: 8px;
   padding: 12px;
-  background: #f8f9fa;
+  background: var(--bg-secondary);
   border-radius: 8px;
-  border-left: 4px solid #3498db;
+  border-left: 4px solid var(--primary-color);
 }
 
 .mmr-value {
   font-weight: 700;
-  color: #2c3e50;
+  color: var(--text-primary);
   font-size: 1.1rem;
 }
 
 .mmr-label {
-  color: #7f8c8d;
+  color: var(--text-muted);
   font-size: 0.9rem;
 }
 
@@ -604,11 +571,13 @@ export default {
   align-items: center;
   gap: 8px;
   padding: 8px 0;
+  color: var(--text-primary);
 }
 
 .roles-selection {
-  display: flex;
-  flex-wrap: wrap;
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 12px;
 }
 
@@ -617,22 +586,23 @@ export default {
   align-items: center;
   gap: 12px;
   padding: 16px;
-  border: 2px solid #e4e7ed;
+  border: 2px solid var(--border-color);
   border-radius: 10px;
   cursor: pointer;
   transition: all 0.3s ease;
   position: relative;
+  background: var(--bg-secondary);
 }
 
 .role-card:hover {
-  border-color: #3498db;
+  border-color: var(--primary-color);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.15);
+  box-shadow: var(--shadow-md);
 }
 
 .role-card.selected {
-  border-color: #3498db;
-  background: linear-gradient(135deg, #f8fafc 0%, #e3f2fd 100%);
+  border-color: var(--primary-color);
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
 }
 
 .role-icon {
@@ -644,35 +614,39 @@ export default {
   border-radius: 10px;
   color: white;
   font-size: 20px;
+  flex-shrink: 0;
 }
 
-.role-icon.carry { background: #e74c3c; }
-.role-icon.mid { background: #3498db; }
-.role-icon.offlane { background: #f39c12; }
-.role-icon.support { background: #27ae60; }
-.role-icon.hard_support { background: #9b59b6; }
+.role-icon.carry { background: var(--danger-gradient); }
+.role-icon.mid { background: var(--primary-gradient); }
+.role-icon.offlane { background: var(--warning-gradient); }
+.role-icon.support { background: var(--success-gradient); }
+.role-icon.hard_support { background: var(--secondary-gradient); }
 
 .role-info {
   flex: 1;
   display: flex;
   flex-direction: column;
   gap: 4px;
+  min-width: 0;
 }
 
 .role-name {
   font-weight: 600;
-  color: #2c3e50;
+  color: var(--text-primary);
+  font-size: 0.9rem;
 }
 
 .role-desc {
-  font-size: 0.8rem;
-  color: #7f8c8d;
+  font-size: 0.75rem;
+  color: var(--text-muted);
   line-height: 1.2;
 }
 
 .check-icon {
-  color: #27ae60;
+  color: var(--success-color);
   font-size: 20px;
+  flex-shrink: 0;
 }
 
 .tags-preview {
@@ -696,116 +670,27 @@ export default {
   justify-content: center;
   margin-top: 32px;
   padding: 24px;
-  background: #f8f9fa;
+  background: var(--bg-secondary);
   border-radius: 12px;
 }
 
 .reset-btn {
   width: 160px;
-  border: 1px solid #dcdfe6;
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
 }
 
 .submit-btn {
   width: 200px;
   font-weight: 600;
+  background: var(--primary-gradient);
+  border: none;
 }
 
-.preview-section {
-  margin-top: 32px;
-  border-radius: 12px;
-}
-
-.team-preview {
-  padding: 20px;
-}
-
-.preview-header {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 20px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid #e4e7ed;
-}
-
-.default-avatar {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-}
-
-.preview-info h3 {
-  margin: 0 0 4px 0;
-  color: #2c3e50;
-  font-size: 1.4rem;
-}
-
-.preview-region {
-  margin: 0;
-  color: #7f8c8d;
-  font-size: 0.95rem;
-}
-
-.preview-content {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.preview-description {
-  margin: 0;
-  color: #5a6c7d;
-  line-height: 1.6;
-  font-style: italic;
-  padding: 16px;
-  background: #f8f9fa;
-  border-radius: 8px;
-  border-left: 4px solid #3498db;
-}
-
-.preview-stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 16px;
-  padding: 20px;
-  background: white;
-  border: 1px solid #e4e7ed;
-  border-radius: 10px;
-}
-
-.preview-stat {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-}
-
-.stat-value {
-  font-size: 1.3rem;
-  font-weight: 700;
-  color: #3498db;
-  margin-bottom: 4px;
-}
-
-.stat-label {
-  font-size: 0.85rem;
-  color: #7f8c8d;
-}
-
-.preview-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-/* Адаптивность */
+/* Адаптивность для формы создания команды */
 @media (max-width: 768px) {
-  .form-header {
-    padding: 20px;
-    margin-bottom: 24px;
-  }
-  
-  .form-header h2 {
-    font-size: 1.6rem;
+  .form-section {
+    margin-bottom: 20px;
   }
   
   .roles-selection {
@@ -823,44 +708,82 @@ export default {
   
   .form-actions {
     flex-direction: column;
+    padding: 20px;
   }
   
   .reset-btn,
   .submit-btn {
     width: 100%;
   }
+  
+  .role-card {
+    padding: 12px;
+  }
+  
+  .role-icon {
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+  }
+  
+  .role-name {
+    font-size: 0.85rem;
+  }
+  
+  .role-desc {
+    font-size: 0.7rem;
+  }
 }
 
 @media (max-width: 480px) {
-  .preview-header {
-    flex-direction: column;
-    text-align: center;
+  .form-section {
+    margin-bottom: 16px;
   }
   
-  .preview-stats {
-    grid-template-columns: 1fr;
+  .section-header {
+    font-size: 1rem;
+  }
+  
+  .enhanced-form-item {
+    margin-bottom: 20px;
+  }
+  
+  .form-actions {
+    margin-top: 24px;
+    padding: 16px;
   }
 }
 
-/* Анимации */
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
+@media (max-width: 360px) {
+  .role-card {
+    padding: 10px;
+    gap: 8px;
+  }
+  
+  .role-info {
+    gap: 2px;
+  }
+  
+  .role-name {
+    font-size: 0.8rem;
+  }
+  
+  .role-desc {
+    font-size: 0.65rem;
+  }
 }
 
 /* Кастомные стили для Element Plus */
 :deep(.el-card__header) {
-  border-bottom: 1px solid #e4e7ed;
+  border-bottom: 1px solid var(--border-color);
   padding: 20px;
+  background: var(--bg-secondary);
 }
 
 :deep(.el-input__wrapper) {
   border-radius: 8px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
 }
 
 :deep(.el-select .el-input__wrapper) {
@@ -869,6 +792,9 @@ export default {
 
 :deep(.el-textarea .el-textarea__inner) {
   border-radius: 8px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
 }
 
 :deep(.el-button) {
@@ -878,5 +804,22 @@ export default {
 
 :deep(.el-tag) {
   border-radius: 6px;
+}
+
+:deep(.el-form-item__label) {
+  color: var(--text-primary) !important;
+}
+
+/* Улучшение доступности */
+@media (prefers-reduced-motion: reduce) {
+  .form-section,
+  .role-card,
+  .preview-tag {
+    transition: none;
+  }
+  
+  .role-card:hover {
+    transform: none;
+  }
 }
 </style>

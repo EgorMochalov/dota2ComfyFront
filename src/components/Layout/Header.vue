@@ -1,35 +1,43 @@
 <template>
   <header class="header">
     <div class="header-container">
-      <div class="logo">
-        <router-link to="/" class="logo-link">
-          <div class="logo-icon">
-            <el-icon size="28"><Star /></el-icon>
-          </div>
-          <div class="logo-text">
-            <h1>Dota 2 Finder</h1>
-            <span class="logo-subtitle">Find Your Team</span>
-          </div>
-        </router-link>
+      <div class="header-left">
+        <!-- Кнопка меню для мобильных -->
+        <div class="menu-toggle" @click="$emit('toggle-sidebar')" v-if="authStore.isAuthenticated">
+          <el-icon><Menu /></el-icon>
+        </div>
+        
+        <div class="logo">
+          <router-link to="/" class="logo-link">
+            <div class="logo-icon">
+              <el-icon size="28"><Star /></el-icon>
+            </div>
+            <div class="logo-text">
+              <h1 class="logo-title">Dota 2 Finder</h1>
+              <span class="logo-subtitle">Find Your Team</span>
+            </div>
+          </router-link>
+        </div>
       </div>
 
       <div class="user-menu" v-if="authStore.isAuthenticated">
-        <NotificationBell />
+        <!-- Уведомления - скрываем на очень маленьких экранах -->
+        <NotificationBell class="notification-bell" />
         
         <el-dropdown trigger="click" class="user-dropdown">
           <div class="user-info">
             <el-avatar 
-              :size="40" 
+              :size="getAvatarSize" 
               :src="authStore.user?.avatar_url" 
               class="user-avatar"
             />
             <div class="user-details">
               <span class="username">{{ authStore.user?.username }}</span>
               <span class="user-status">
-                <el-tag v-if="authStore.user?.team_id" size="small" type="success">
+                <el-tag v-if="authStore.user?.team_id" size="small" type="success" class="status-tag">
                   В команде
                 </el-tag>
-                <el-tag v-else size="small" type="info">
+                <el-tag v-else size="small" type="info" class="status-tag">
                   Без команды
                 </el-tag>
               </span>
@@ -70,13 +78,15 @@
 
       <div class="auth-buttons" v-else>
         <router-link to="/login">
-          <el-button type="primary" class="auth-button">
-            Войти
+          <el-button type="primary" class="auth-button login-btn">
+            <span class="btn-text">Войти</span>
+            <el-icon class="btn-icon"><User /></el-icon>
           </el-button>
         </router-link>
         <router-link to="/register">
-          <el-button class="auth-button secondary">
-            Регистрация
+          <el-button class="auth-button secondary register-btn">
+            <span class="btn-text">Регистрация</span>
+            <el-icon class="btn-icon"><Edit /></el-icon>
           </el-button>
         </router-link>
       </div>
@@ -87,6 +97,7 @@
 <script>
 import { useAuthStore } from '../../stores/auth'
 import { useNotificationsStore } from '../../stores/notifications'
+import { computed } from 'vue'
 import NotificationBell from './NotificationBell.vue'
 import {
   User,
@@ -97,7 +108,9 @@ import {
   ArrowDown,
   Star,
   ChatDotRound,
-  Mouse
+  Mouse,
+  Menu,
+  Edit
 } from '@element-plus/icons-vue'
 
 export default {
@@ -112,11 +125,21 @@ export default {
     SwitchButton,
     ArrowDown,
     Star,
-    ChatDotRound
+    ChatDotRound,
+    Menu,
+    Edit
   },
+  emits: ['toggle-sidebar'],
   setup() {
     const authStore = useAuthStore()
     const notificationsStore = useNotificationsStore()
+
+    const getAvatarSize = computed(() => {
+      const width = window.innerWidth
+      if (width < 480) return 32
+      if (width < 768) return 36
+      return 40
+    })
 
     const handleLogout = async () => {
       await authStore.logout()
@@ -126,6 +149,7 @@ export default {
     return {
       authStore,
       notificationsStore,
+      getAvatarSize,
       handleLogout
     }
   }
@@ -154,6 +178,7 @@ export default {
 
 .header-container {
   display: flex;
+  flex-direction: row;
   align-items: center;
   justify-content: space-between;
   max-width: 1400px;
@@ -162,6 +187,27 @@ export default {
   padding: 0 24px;
   position: relative;
   z-index: 1;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.menu-toggle {
+  display: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: var(--border-radius);
+  transition: all var(--transition-normal);
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.menu-toggle:hover {
+  background: rgba(255, 255, 255, 0.2);
 }
 
 .logo-link {
@@ -187,9 +233,15 @@ export default {
   border-radius: 12px;
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
+  flex-shrink: 0;
 }
 
-.logo-text h1 {
+.logo-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.logo-title {
   margin: 0;
   font-size: 1.4rem;
   font-weight: 700;
@@ -197,6 +249,7 @@ export default {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  line-height: 1.2;
 }
 
 .logo-subtitle {
@@ -204,44 +257,17 @@ export default {
   opacity: 0.8;
   font-weight: 500;
   letter-spacing: 0.5px;
-}
-
-.nav {
-  display: flex;
-  gap: 8px;
-  margin-left: 40px;
-}
-
-.nav-link {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: white;
-  text-decoration: none;
-  padding: 12px 20px;
-  border-radius: var(--border-radius);
-  transition: all var(--transition-normal);
-  font-weight: 500;
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.nav-link:hover {
-  background: rgba(255, 255, 255, 0.15);
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-sm);
-}
-
-.nav-link.router-link-active {
-  background: rgba(255, 255, 255, 0.2);
-  box-shadow: var(--shadow-sm);
+  margin-top: 2px;
 }
 
 .user-menu {
   display: flex;
   align-items: center;
   gap: 16px;
+}
+
+.notification-bell {
+  flex-shrink: 0;
 }
 
 .user-dropdown {
@@ -267,6 +293,7 @@ export default {
 
 .user-avatar {
   border: 2px solid rgba(255, 255, 255, 0.3);
+  flex-shrink: 0;
 }
 
 .user-details {
@@ -278,17 +305,25 @@ export default {
 .username {
   font-weight: 600;
   font-size: 0.9rem;
+  white-space: nowrap;
 }
 
 .user-status {
   font-size: 0.7rem;
   opacity: 0.9;
-  margin-top: 5px;
+  margin-top: 2px;
+}
+
+.status-tag {
+  font-size: 0.6rem;
+  padding: 2px 6px;
+  height: auto;
 }
 
 .dropdown-arrow {
   transition: transform var(--transition-fast);
   opacity: 0.7;
+  flex-shrink: 0;
 }
 
 .user-dropdown:hover .dropdown-arrow {
@@ -331,6 +366,20 @@ export default {
   padding: 10px 24px;
   font-weight: 600;
   border-radius: var(--border-radius);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-text {
+  transition: opacity var(--transition-normal);
+}
+
+.btn-icon {
+  display: none;
+  transition: transform var(--transition-normal);
 }
 
 .auth-button.secondary {
@@ -345,14 +394,45 @@ export default {
   transform: translateY(-1px);
 }
 
-/* Адаптивность */
+/* ===== АДАПТИВНОСТЬ ===== */
+
+/* Планшеты и маленькие ноутбуки (1024px - 768px) */
+@media (max-width: 1024px) {
+  .header-container {
+    padding: 0 20px;
+  }
+  
+  .logo-title {
+    font-size: 1.3rem;
+  }
+  
+  .logo-icon {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .user-info {
+    padding: 6px 14px;
+    gap: 10px;
+  }
+  
+  .auth-button {
+    padding: 9px 20px;
+  }
+}
+
+/* Планшеты (768px и меньше) */
 @media (max-width: 768px) {
   .header-container {
     padding: 0 16px;
     height: 60px;
   }
   
-  .logo-text h1 {
+  .menu-toggle {
+    display: flex;
+  }
+  
+  .logo-title {
     font-size: 1.2rem;
   }
   
@@ -360,18 +440,9 @@ export default {
     display: none;
   }
   
-  .nav {
-    margin-left: 20px;
-    gap: 4px;
-  }
-  
-  .nav-link {
-    padding: 10px 16px;
-    font-size: 0.9rem;
-  }
-  
-  .nav-link span {
-    display: none;
+  .logo-icon {
+    width: 36px;
+    height: 36px;
   }
   
   .user-details {
@@ -381,11 +452,80 @@ export default {
   .dropdown-arrow {
     display: none;
   }
+  
+  .user-info {
+    padding: 6px 12px;
+    gap: 8px;
+  }
+  
+  .auth-button {
+    padding: 8px 16px;
+    font-size: 0.9rem;
+  }
+  
+  .user-menu {
+    gap: 12px;
+  }
 }
 
-@media (max-width: 480px) {
-  .nav {
+/* Большие мобильные (600px - 480px) */
+@media (max-width: 600px) {
+  .header-container {
+    padding: 0 14px;
+  }
+  
+  .logo-title {
+    font-size: 1.1rem;
+  }
+  
+  .logo-icon {
+    width: 34px;
+    height: 34px;
+  }
+  
+  .logo-link {
+    gap: 10px;
+  }
+  
+  .auth-button {
+    padding: 8px 14px;
+  }
+  
+  .btn-text {
+    display: block;
+  }
+  
+  .btn-icon {
     display: none;
+  }
+}
+
+/* Средние мобильные (480px - 400px) */
+@media (max-width: 480px) {
+  .header-container {
+    padding: 0 12px;
+    height: 56px;
+  }
+  
+  .logo-title {
+    font-size: 1rem;
+  }
+  
+  .logo-icon {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .header-left {
+    gap: 12px;
+  }
+  
+  .menu-toggle {
+    padding: 6px;
+  }
+  
+  .user-info {
+    padding: 5px 10px;
   }
   
   .auth-buttons {
@@ -393,8 +533,143 @@ export default {
   }
   
   .auth-button {
-    padding: 8px 16px;
+    padding: 7px 12px;
+    font-size: 0.85rem;
+  }
+  
+  .notification-bell {
+    transform: scale(0.9);
+  }
+}
+
+/* Маленькие мобильные (400px - 360px) */
+@media (max-width: 400px) {
+  .header-container {
+    padding: 0 10px;
+  }
+  
+  .logo-title {
     font-size: 0.9rem;
+  }
+  
+  .logo {
+    display: none;
+  }
+  
+  .logo-link {
+    gap: 0;
+  }
+  
+  .auth-buttons {
+    gap: 6px;
+  }
+  
+  .auth-button {
+    padding: 6px 10px;
+    min-width: auto;
+  }
+  
+  .btn-text {
+    display: none;
+  }
+  
+  .btn-icon {
+    display: block;
+    font-size: 1.1rem;
+  }
+  
+  .user-info {
+    padding: 4px 8px;
+  }
+  
+  .notification-bell {
+    transform: scale(0.85);
+  }
+}
+
+/* Очень маленькие мобильные (360px и меньше) */
+@media (max-width: 360px) {
+  .header-container {
+    padding: 0 8px;
+  }
+  
+  .logo-icon {
+    width: 30px;
+    height: 30px;
+  }
+  
+  .menu-toggle {
+    padding: 5px;
+  }
+  
+  .user-menu {
+    gap: 8px;
+  }
+  
+  .auth-button {
+    padding: 5px 8px;
+  }
+  
+  .btn-icon {
+    font-size: 1rem;
+  }
+  
+  .notification-bell {
+    transform: scale(0.8);
+  }
+  
+  .user-info {
+    padding: 4px 6px;
+  }
+}
+
+/* Ландшафтная ориентация для мобильных */
+@media (max-height: 500px) and (max-width: 900px) {
+  .header-container {
+    height: 50px;
+  }
+  
+  .logo-icon {
+    width: 30px;
+    height: 30px;
+  }
+  
+  .logo-title {
+    font-size: 1rem;
+  }
+}
+
+/* Высокие экраны */
+@media (min-height: 800px) and (max-width: 768px) {
+  .header-container {
+    height: 65px;
+  }
+}
+
+/* Анимации для плавных переходов */
+.logo-link,
+.menu-toggle,
+.user-info,
+.auth-button,
+.notification-bell {
+  transition: all var(--transition-normal);
+}
+
+/* Улучшение доступности */
+@media (prefers-reduced-motion: reduce) {
+  .logo-link,
+  .menu-toggle,
+  .user-info,
+  .auth-button,
+  .dropdown-arrow {
+    transition: none;
+  }
+}
+
+/* Поддержка темной темы */
+@media (prefers-color-scheme: dark) {
+  .header {
+    background: linear-gradient(135deg, #5a67d8 0%, #805ad5 100%);
   }
 }
 </style>

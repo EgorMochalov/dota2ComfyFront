@@ -1,15 +1,25 @@
 <template>
   <div class="team-detail-page">
+    <!-- Лоадер -->
+    <div v-if="loading" class="loading-container">
+      <div class="loader-content">
+        <el-icon class="is-loading loader-icon"><Loading /></el-icon>
+        <p>Загрузка информации о команде...</p>
+      </div>
+    </div>
+
     <!-- Hero секция команды -->
-    <div class="team-hero" :style="heroStyle">
+    <div v-else class="team-hero" :style="heroStyle">
       <div class="hero-overlay"></div>
       <div class="hero-content">
         <div class="team-basic-info">
-          <el-avatar 
-            :size="120" 
-            :src="team?.avatar_url" 
-            class="team-avatar"
-          />
+          <div class="avatar-section">
+            <el-avatar 
+              :size="120" 
+              :src="team?.avatar_url" 
+              class="team-avatar"
+            />
+          </div>
           <div class="team-main-info">
             <h1 class="team-name">{{ team?.name }}</h1>
             <div class="team-meta">
@@ -77,7 +87,7 @@
     </div>
 
     <!-- Основной контент -->
-    <div class="team-content">
+    <div v-if="!loading" class="team-content">
       <div class="content-grid">
         <!-- Левая колонка - основная информация -->
         <div class="main-column">
@@ -387,7 +397,8 @@ import {
   PriceTag,
   UserFilled,
   DataAnalysis,
-  Connection
+  Connection,
+  Loading
 } from '@element-plus/icons-vue'
 
 export default {
@@ -407,7 +418,8 @@ export default {
     UserFilled,
     DataAnalysis,
     Trophy,
-    Connection
+    Connection,
+    Loading
   },
   setup() {
     const route = useRoute()
@@ -572,10 +584,35 @@ export default {
   background: var(--bg-primary);
 }
 
+/* Лоадер */
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
+  padding: 40px 20px;
+}
+
+.loader-content {
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.loader-icon {
+  font-size: 3rem;
+  margin-bottom: 16px;
+  color: var(--primary-color);
+}
+
+.loader-content p {
+  font-size: 1.1rem;
+  margin: 0;
+}
+
 /* Hero секция */
 .team-hero {
   position: relative;
-  padding: 80px 20px;
+  padding: 60px 20px;
   color: white;
   background: var(--primary-gradient);
   overflow: hidden;
@@ -596,6 +633,7 @@ export default {
   margin: 0 auto;
   display: flex;
   justify-content: space-between;
+  align-items: center;
   gap: 40px;
 }
 
@@ -603,41 +641,49 @@ export default {
   display: flex;
   align-items: center;
   gap: 30px;
+  flex: 1;
 }
 
 .team-avatar {
   border: 4px solid rgba(255, 255, 255, 0.2);
   box-shadow: var(--shadow-xl);
+  flex-shrink: 0;
 }
 
 .team-main-info {
   flex: 1;
+  min-width: 0;
 }
 
 .team-name {
-  font-size: 3rem;
+  font-size: 2.5rem;
   font-weight: 700;
   margin: 0 0 20px 0;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+  word-wrap: break-word;
+  line-height: 1.2;
 }
 
 .team-meta {
   display: flex;
   gap: 30px;
   margin-bottom: 20px;
+  flex-wrap: wrap;
 }
 
 .meta-item {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 1.1rem;
+  font-size: 1rem;
   opacity: 0.9;
+  flex-shrink: 0;
 }
 
 .team-status-badges {
   display: flex;
   gap: 10px;
+  flex-wrap: wrap;
 }
 
 .status-badge {
@@ -651,6 +697,7 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 15px;
+  flex-shrink: 0;
 }
 
 .action-btn {
@@ -659,7 +706,8 @@ export default {
   color: white;
   backdrop-filter: blur(10px);
   font-weight: 600;
-  padding: 15px 25px;
+  padding: 12px 20px;
+  white-space: nowrap;
 }
 
 .action-btn:hover {
@@ -691,6 +739,7 @@ export default {
   box-shadow: var(--shadow-md);
   transition: all var(--transition-normal);
   margin-bottom: 24px;
+  overflow: hidden;
 }
 
 .info-card:hover,
@@ -705,8 +754,9 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 !important;
+  padding: 20px 24px !important;
   border: none !important;
+  background: var(--bg-secondary);
 }
 
 .card-header h3 {
@@ -727,6 +777,7 @@ export default {
   line-height: 1.7;
   font-size: 1.1rem;
   margin: 0;
+  padding: 0 24px 24px;
 }
 
 /* Детали команды */
@@ -734,6 +785,7 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 20px;
+  padding: 0 24px 24px;
 }
 
 .detail-item {
@@ -764,6 +816,7 @@ export default {
 
 .detail-content {
   flex: 1;
+  min-width: 0;
 }
 
 .detail-label {
@@ -785,6 +838,7 @@ export default {
 .tag-tag {
   border: none;
   font-weight: 500;
+  flex-shrink: 0;
 }
 
 .game-mode-tag {
@@ -812,6 +866,7 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  padding: 0 24px 24px;
 }
 
 .member-card {
@@ -851,6 +906,7 @@ export default {
 
 .member-info {
   flex: 1;
+  min-width: 0;
 }
 
 .member-name {
@@ -861,12 +917,14 @@ export default {
   display: flex;
   align-items: center;
   gap: 10px;
+  flex-wrap: wrap;
 }
 
 .captain-badge {
   background: var(--warning-gradient);
   color: white;
   border: none;
+  flex-shrink: 0;
 }
 
 .member-mmr {
@@ -886,6 +944,7 @@ export default {
   color: white;
   border: none;
   font-size: 0.8rem;
+  flex-shrink: 0;
 }
 
 .member-actions {
@@ -907,6 +966,7 @@ export default {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px;
+  padding: 0 24px 24px;
 }
 
 .stat-item {
@@ -953,6 +1013,7 @@ export default {
 
 .captain-details {
   flex: 1;
+  min-width: 0;
 }
 
 .captain-name {
@@ -960,6 +1021,7 @@ export default {
   color: var(--text-primary);
   font-size: 1.2rem;
   font-weight: 600;
+  word-wrap: break-word;
 }
 
 .captain-mmr,
@@ -972,6 +1034,7 @@ export default {
 .captain-actions {
   display: flex;
   gap: 10px;
+  padding: 0 20px 20px;
 }
 
 .full-width-btn {
@@ -984,6 +1047,7 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  padding: 0 24px 24px;
 }
 
 .similar-team-item {
@@ -1004,6 +1068,7 @@ export default {
 
 .similar-team-info {
   flex: 1;
+  min-width: 0;
 }
 
 .similar-team-name {
@@ -1011,6 +1076,9 @@ export default {
   color: var(--text-primary);
   font-size: 0.9rem;
   font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .similar-team-mmr {
@@ -1049,10 +1117,10 @@ export default {
 }
 
 /* Адаптивность */
-@media (max-width: 1024px) {
+@media (max-width: 1200px) {
   .content-grid {
     grid-template-columns: 1fr;
-    gap: 20px;
+    gap: 24px;
   }
   
   .sidebar-column {
@@ -1060,7 +1128,7 @@ export default {
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 992px) {
   .hero-content {
     flex-direction: column;
     text-align: center;
@@ -1070,56 +1138,252 @@ export default {
   .team-basic-info {
     flex-direction: column;
     gap: 20px;
-  }
-  
-  .team-name {
-    font-size: 2.5rem;
+    text-align: center;
   }
   
   .team-meta {
-    flex-direction: column;
-    gap: 15px;
+    justify-content: center;
+  }
+  
+  .team-status-badges {
+    justify-content: center;
   }
   
   .hero-actions {
     flex-direction: row;
     justify-content: center;
-  }
-  
-  .stats-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .member-card {
-    flex-direction: column;
-    text-align: center;
-    gap: 12px;
-  }
-  
-  .member-name {
-    justify-content: center;
+    flex-wrap: wrap;
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 768px) {
   .team-hero {
-    padding: 60px 15px;
+    padding: 40px 16px;
   }
   
   .team-content {
-    padding: 20px 15px;
+    padding: 30px 16px;
   }
   
   .team-name {
     font-size: 2rem;
   }
   
+  .team-meta {
+    flex-direction: column;
+    gap: 15px;
+    align-items: center;
+  }
+  
+  .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .member-card {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+    padding: 16px;
+  }
+  
+  .member-name {
+    justify-content: center;
+  }
+  
+  .detail-item {
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+  }
+  
+  .card-header {
+    padding: 16px 20px !important;
+  }
+  
+  .card-header h3 {
+    font-size: 1.1rem;
+  }
+  
+  .team-description,
+  .details-grid,
+  .members-grid,
+  .stats-grid,
+  .similar-teams-list {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+}
+
+@media (max-width: 576px) {
+  .team-hero {
+    padding: 30px 12px;
+  }
+  
+  .team-content {
+    padding: 20px 12px;
+  }
+  
+  .team-name {
+    font-size: 1.8rem;
+  }
+  
   .hero-actions {
     flex-direction: column;
+    width: 100%;
   }
   
   .action-btn {
     width: 100%;
+    justify-content: center;
+  }
+  
+  .team-avatar {
+    width: 80px !important;
+    height: 80px !important;
+  }
+  
+  .loading-container {
+    padding: 30px 16px;
+    min-height: 50vh;
+  }
+  
+  .loader-icon {
+    font-size: 2.5rem;
+  }
+  
+  .stat-item {
+    padding: 16px;
+  }
+  
+  .stat-value {
+    font-size: 1.5rem;
+  }
+  
+  .captain-info {
+    flex-direction: column;
+    text-align: center;
+    gap: 15px;
+    padding: 16px;
+  }
+  
+  .similar-team-item {
+    flex-direction: column;
+    text-align: center;
+    gap: 10px;
+    padding: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .team-hero {
+    padding: 25px 10px;
+  }
+  
+  .team-content {
+    padding: 15px 10px;
+  }
+  
+  .team-name {
+    font-size: 1.6rem;
+  }
+  
+  .card-header {
+    padding: 12px 16px !important;
+  }
+  
+  .team-description,
+  .details-grid,
+  .members-grid,
+  .stats-grid,
+  .similar-teams-list {
+    padding-left: 16px;
+    padding-right: 16px;
+    padding-bottom: 16px;
+  }
+  
+  .detail-item,
+  .member-card {
+    padding: 12px;
+  }
+  
+  .loading-container {
+    padding: 20px 12px;
+  }
+  
+  .loader-icon {
+    font-size: 2rem;
+  }
+  
+  .loader-content p {
+    font-size: 1rem;
+  }
+}
+
+/* Улучшение доступности */
+@media (prefers-reduced-motion: reduce) {
+  .info-card,
+  .member-card,
+  .detail-item,
+  .stat-item,
+  .similar-team-item,
+  .action-btn,
+  .submit-btn {
+    transition: none;
+  }
+  
+  .info-card:hover,
+  .member-card:hover,
+  .detail-item:hover,
+  .stat-item:hover,
+  .similar-team-item:hover,
+  .action-btn:hover,
+  .submit-btn:hover {
+    transform: none;
+  }
+}
+
+/* Исправление выхода за экран */
+.team-detail-page,
+.team-hero,
+.team-content,
+.hero-content {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.content-grid,
+.team-basic-info,
+.team-meta,
+.team-status-badges,
+.hero-actions {
+  max-width: 100%;
+}
+
+/* Улучшение скролла на мобильных */
+@media (max-width: 768px) {
+  .team-detail-page {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Улучшение отображения текста */
+.team-name,
+.captain-name,
+.similar-team-name {
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.detail-value,
+.member-roles {
+  justify-content: center;
+}
+
+@media (min-width: 769px) {
+  .detail-value,
+  .member-roles {
+    justify-content: flex-start;
   }
 }
 </style>

@@ -18,170 +18,186 @@
     <div class="players-content">
       <!-- Боковая панель с фильтрами -->
       <div class="filters-sidebar">
-        <div class="filters-card">
-          <div class="filters-header">
-            <h3>Фильтры</h3>
-            <el-button 
-              type="text" 
-              @click="resetFilters" 
-              class="reset-btn"
-            >
-              Сбросить все
-            </el-button>
+        <!-- Кнопка для мобильных - показать/скрыть фильтры -->
+        <div class="mobile-filters-toggle" @click="showMobileFilters = !showMobileFilters">
+          <div class="toggle-content">
+            <el-icon class="toggle-icon"><Filter /></el-icon>
+            <div class="toggle-text">
+              <span class="toggle-title">Фильтры</span>
+              <span class="filters-count" v-if="activeFiltersCount > 0">
+                {{ activeFiltersCount }} активных
+              </span>
+            </div>
           </div>
-
-          <div class="filters-body">
-            <!-- Регион -->
-            <div class="filter-group">
-              <label class="filter-label">Регион</label>
-              <el-select
-                v-model="filters.region"
-                placeholder="Все регионы"
-                clearable
-                class="filter-select"
-              >
-                <el-option
-                  v-for="region in REGIONS"
-                  :key="region.value"
-                  :label="region.label"
-                  :value="region.value"
-                />
-              </el-select>
-            </div>
-
-            <!-- MMR диапазон -->
-            <div class="filter-group">
-              <label class="filter-label">MMR диапазон</label>
-              <div class="range-inputs">
-                <el-input-number
-                  v-model="filters.mmr_min"
-                  :min="0"
-                  :max="10000"
-                  placeholder="От"
-                  controls-position="right"
-                  class="range-input"
-                />
-                <span class="range-separator">—</span>
-                <el-input-number
-                  v-model="filters.mmr_max"
-                  :min="0"
-                  :max="10000"
-                  placeholder="До"
-                  controls-position="right"
-                  class="range-input"
-                />
-              </div>
-            </div>
-
-            <!-- Режимы игры -->
-            <div class="filter-group">
-              <label class="filter-label">Режимы игры</label>
-              <el-select
-                v-model="filters.game_modes"
-                multiple
-                placeholder="Все режимы"
-                clearable
-                class="filter-select"
-              >
-                <el-option
-                  v-for="mode in GAME_MODES"
-                  :key="mode.value"
-                  :label="mode.label"
-                  :value="mode.value"
-                />
-              </el-select>
-            </div>
-
-            <!-- Роли -->
-            <div class="filter-group">
-              <label class="filter-label">Предпочитаемые роли</label>
-              <div class="roles-grid">
-                <div
-                  v-for="role in ROLES"
-                  :key="role.value"
-                  class="role-option"
-                  :class="{ active: filters.preferred_roles.includes(role.value) }"
-                  @click="toggleRole(role.value)"
-                >
-                  <div class="role-icon" :class="`role-${role.value}`">
-                    <el-icon><User /></el-icon>
-                  </div>
-                  <span class="role-label">{{ role.label }}</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Теги -->
-            <div class="filter-group">
-              <label class="filter-label">Теги</label>
-              <el-select
-                v-model="filters.tags"
-                multiple
-                filterable
-                allow-create
-                default-first-option
-                placeholder="Выберите теги"
-                class="filter-select"
-              >
-                <el-option
-                  v-for="tag in TAGS"
-                  :key="tag"
-                  :label="tag"
-                  :value="tag"
-                />
-              </el-select>
-            </div>
-
-            <!-- Дополнительные фильтры -->
-            <div class="filter-group">
-              <label class="filter-label">Дополнительно</label>
-              <div class="switch-filters">
-                <div class="switch-item">
-                  <el-switch
-                    v-model="filters.is_online"
-                    active-color="var(--primary-color)"
-                  />
-                  <span class="switch-label">Только онлайн</span>
-                </div>
-                <div class="switch-item">
-                  <el-switch
-                    v-model="filters.is_searching"
-                    active-color="var(--primary-color)"
-                  />
-                  <span class="switch-label">Только в поиске</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Кнопка поиска -->
-            <el-button
-              type="primary"
-              class="search-btn"
-              @click="handleSearch"
-              :loading="searching"
-              :disabled="!hasActiveFilters"
-            >
-              <template #icon>
-                <el-icon><Search /></el-icon>
-              </template>
-              Применить фильтры
-            </el-button>
-          </div>
+          <el-icon :class="{ 'rotate-180': showMobileFilters }"><ArrowDown /></el-icon>
         </div>
 
-        <!-- Быстрый поиск -->
-        <div class="quick-search-card">
-          <h4>Быстрый поиск</h4>
-          <div class="quick-search-buttons">
-            <el-button
-              v-for="preset in searchPresets"
-              :key="preset.name"
-              type="text"
-              class="quick-search-btn"
-              @click="applyPreset(preset)"
-            >
-              {{ preset.name }}
-            </el-button>
+        <div class="filters-container" :class="{ 'mobile-visible': showMobileFilters }">
+          <div class="filters-card">
+            <div class="filters-header">
+              <h3>Фильтры</h3>
+              <el-button 
+                type="text" 
+                @click="resetFilters" 
+                class="reset-btn"
+              >
+                Сбросить все
+              </el-button>
+            </div>
+
+            <div class="filters-body">
+              <!-- Регион -->
+              <div class="filter-group">
+                <label class="filter-label">Регион</label>
+                <el-select
+                  v-model="filters.region"
+                  placeholder="Все регионы"
+                  clearable
+                  class="filter-select"
+                >
+                  <el-option
+                    v-for="region in REGIONS"
+                    :key="region.value"
+                    :label="region.label"
+                    :value="region.value"
+                  />
+                </el-select>
+              </div>
+
+              <!-- MMR диапазон -->
+              <div class="filter-group">
+                <label class="filter-label">MMR диапазон</label>
+                <div class="range-inputs">
+                  <el-input-number
+                    v-model="filters.mmr_min"
+                    :min="0"
+                    :max="10000"
+                    placeholder="От"
+                    controls-position="right"
+                    class="range-input"
+                  />
+                  <span class="range-separator">—</span>
+                  <el-input-number
+                    v-model="filters.mmr_max"
+                    :min="0"
+                    :max="10000"
+                    placeholder="До"
+                    controls-position="right"
+                    class="range-input"
+                  />
+                </div>
+              </div>
+
+              <!-- Режимы игры -->
+              <div class="filter-group">
+                <label class="filter-label">Режимы игры</label>
+                <el-select
+                  v-model="filters.game_modes"
+                  multiple
+                  placeholder="Все режимы"
+                  clearable
+                  class="filter-select"
+                >
+                  <el-option
+                    v-for="mode in GAME_MODES"
+                    :key="mode.value"
+                    :label="mode.label"
+                    :value="mode.value"
+                  />
+                </el-select>
+              </div>
+
+              <!-- Роли -->
+              <div class="filter-group">
+                <label class="filter-label">Предпочитаемые роли</label>
+                <div class="roles-grid">
+                  <div
+                    v-for="role in ROLES"
+                    :key="role.value"
+                    class="role-option"
+                    :class="{ active: filters.preferred_roles.includes(role.value) }"
+                    @click="toggleRole(role.value)"
+                  >
+                    <div class="role-icon" :class="`role-${role.value}`">
+                      <el-icon><User /></el-icon>
+                    </div>
+                    <span class="role-label">{{ role.label }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Теги -->
+              <div class="filter-group">
+                <label class="filter-label">Теги</label>
+                <el-select
+                  v-model="filters.tags"
+                  multiple
+                  filterable
+                  allow-create
+                  default-first-option
+                  placeholder="Выберите теги"
+                  class="filter-select"
+                >
+                  <el-option
+                    v-for="tag in TAGS"
+                    :key="tag"
+                    :label="tag"
+                    :value="tag"
+                  />
+                </el-select>
+              </div>
+
+              <!-- Дополнительные фильтры -->
+              <div class="filter-group">
+                <label class="filter-label">Дополнительно</label>
+                <div class="switch-filters">
+                  <div class="switch-item">
+                    <el-switch
+                      v-model="filters.is_online"
+                      active-color="var(--primary-color)"
+                    />
+                    <span class="switch-label">Только онлайн</span>
+                  </div>
+                  <div class="switch-item">
+                    <el-switch
+                      v-model="filters.is_searching"
+                      active-color="var(--primary-color)"
+                    />
+                    <span class="switch-label">Только в поиске</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Кнопка поиска -->
+              <el-button
+                type="primary"
+                class="search-btn"
+                @click="handleSearch"
+                :loading="searching"
+                :disabled="!hasActiveFilters"
+              >
+                <template #icon>
+                  <el-icon><Search /></el-icon>
+                </template>
+                Применить фильтры
+              </el-button>
+            </div>
+          </div>
+
+          <!-- Быстрый поиск -->
+          <div class="quick-search-card">
+            <h4>Быстрый поиск</h4>
+            <div class="quick-search-buttons">
+              <el-button
+                v-for="preset in searchPresets"
+                :key="preset.name"
+                type="text"
+                class="quick-search-btn"
+                @click="applyPreset(preset)"
+              >
+                {{ preset.name }}
+              </el-button>
+            </div>
           </div>
         </div>
       </div>
@@ -220,8 +236,16 @@
           </div>
         </div>
 
+        <!-- Лоадер при загрузке -->
+        <div v-if="searching" class="loading-container">
+          <div class="loader-content">
+            <el-icon class="loading-spinner" :size="48"><Loading /></el-icon>
+            <p>Поиск игроков...</p>
+          </div>
+        </div>
+
         <!-- Сетка игроков -->
-        <div class="players-grid">
+        <div v-else-if="searchResults.length > 0" class="players-grid">
           <div
             v-for="player in searchResults"
             :key="player.id"
@@ -356,7 +380,7 @@
         </div>
 
         <!-- Состояние пустых результатов -->
-        <div v-if="searchResults.length === 0 && searched" class="empty-results">
+        <div v-else-if="searched && searchResults.length === 0" class="empty-results">
           <div class="empty-state">
             <el-icon class="empty-icon"><Search /></el-icon>
             <h4>Игроки не найдены</h4>
@@ -364,6 +388,15 @@
             <el-button type="primary" @click="resetFilters">
               Сбросить фильтры
             </el-button>
+          </div>
+        </div>
+
+        <!-- Начальное состояние (до поиска) -->
+        <div v-else class="initial-state">
+          <div class="initial-content">
+            <el-icon class="initial-icon"><User /></el-icon>
+            <h4>Начните поиск игроков</h4>
+            <p>Используйте фильтры, чтобы найти подходящих тиммейтов</p>
           </div>
         </div>
       </div>
@@ -416,7 +449,10 @@ import {
   View,
   Plus,
   TrendCharts,
-  Location
+  Location,
+  Filter,
+  ArrowDown,
+  Loading
 } from '@element-plus/icons-vue'
 
 export default {
@@ -428,7 +464,10 @@ export default {
     View,
     Plus,
     TrendCharts,
-    Location
+    Location,
+    Filter,
+    ArrowDown,
+    Loading
   },
   setup() {
     const router = useRouter()
@@ -456,6 +495,7 @@ export default {
     const inviteDialogVisible = ref(false)
     const sendingInvitation = ref(false)
     const selectedPlayer = ref(null)
+    const showMobileFilters = ref(false)
 
     const inviteForm = ref({
       message: ''
@@ -624,6 +664,7 @@ export default {
     const handleSearch = async () => {
       searching.value = true
       searched.value = true
+      showMobileFilters.value = false
       
       try {
         // Очищаем пустые параметры
@@ -742,6 +783,7 @@ export default {
       hasActiveFilters,
       activeFiltersCount,
       activeFiltersList,
+      showMobileFilters,
       getRegionLabel,
       getGameModeLabel,
       getRoleLabel,
@@ -847,6 +889,72 @@ export default {
 
 /* Боковая панель с фильтрами */
 .filters-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Улучшенная кнопка фильтров для мобильных */
+.mobile-filters-toggle {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: var(--bg-card);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  transition: var(--transition-normal);
+  margin-bottom: 0;
+}
+
+.mobile-filters-toggle:hover {
+  background: var(--bg-secondary);
+  transform: translateY(-1px);
+}
+
+.toggle-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.toggle-icon {
+  color: var(--primary-color);
+  font-size: 1.2rem;
+}
+
+.toggle-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.toggle-title {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 1rem;
+}
+
+.filters-count {
+  font-size: 0.8rem;
+  color: var(--primary-color);
+  font-weight: 500;
+  background: rgba(102, 126, 234, 0.1);
+  padding: 2px 8px;
+  border-radius: 12px;
+}
+
+.mobile-filters-toggle .rotate-180 {
+  transform: rotate(180deg);
+  transition: transform var(--transition-normal);
+  color: var(--text-muted);
+}
+
+.filters-container {
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -1107,6 +1215,40 @@ export default {
   border: 1px solid var(--border-color);
 }
 
+/* Лоадер */
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  background: var(--bg-card);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border-color);
+}
+
+.loader-content {
+  text-align: center;
+  padding: 40px;
+}
+
+.loading-spinner {
+  color: var(--primary-color);
+  margin-bottom: 16px;
+  animation: spin 1.5s linear infinite;
+}
+
+.loader-content p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
 /* Сетка игроков */
 .players-grid {
   display: grid;
@@ -1125,6 +1267,7 @@ export default {
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  width: 100%;
 }
 
 .player-card::before {
@@ -1153,6 +1296,7 @@ export default {
   display: flex;
   gap: 16px;
   margin-bottom: 16px;
+  width: 100%;
 }
 
 .player-avatar {
@@ -1179,6 +1323,7 @@ export default {
 .player-main-info {
   flex: 1;
   min-width: 0;
+  width: 100%;
 }
 
 .player-name {
@@ -1187,7 +1332,9 @@ export default {
   font-size: 1.1rem;
   font-weight: 600;
   cursor: pointer;
+  text-align: start;
   transition: var(--transition-fast);
+  width: 100%;
 }
 
 .player-name:hover {
@@ -1198,6 +1345,7 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  width: 100%;
 }
 
 .player-mmr,
@@ -1207,10 +1355,12 @@ export default {
   gap: 6px;
   font-size: 0.8rem;
   color: var(--text-muted);
+  width: 100%;
 }
 
 .player-status {
   flex-shrink: 0;
+  align-self: flex-start;
 }
 
 .status-tag {
@@ -1225,6 +1375,7 @@ export default {
 /* Роли игрока */
 .player-roles {
   margin-bottom: 12px;
+  width: 100%;
 }
 
 .roles-label {
@@ -1232,12 +1383,14 @@ export default {
   font-weight: 600;
   color: var(--text-muted);
   margin-bottom: 6px;
+  width: 100%;
 }
 
 .roles-list {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+  width: 100%;
 }
 
 .role-badge {
@@ -1258,6 +1411,7 @@ export default {
 /* Режимы игры */
 .player-modes {
   margin-bottom: 12px;
+  width: 100%;
 }
 
 .modes-label {
@@ -1265,12 +1419,14 @@ export default {
   font-weight: 600;
   color: var(--text-muted);
   margin-bottom: 6px;
+  width: 100%;
 }
 
 .modes-list {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+  width: 100%;
 }
 
 .mode-tag {
@@ -1283,12 +1439,14 @@ export default {
 /* Теги */
 .player-tags {
   margin-bottom: 12px;
+  width: 100%;
 }
 
 .tags-list {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+  width: 100%;
 }
 
 .player-tag {
@@ -1301,6 +1459,7 @@ export default {
 /* О себе */
 .player-about {
   margin-bottom: 16px;
+  width: 100%;
 }
 
 .player-about p {
@@ -1309,6 +1468,7 @@ export default {
   color: var(--text-secondary);
   line-height: 1.4;
   font-style: italic;
+  width: 100%;
 }
 
 /* Действия */
@@ -1317,6 +1477,7 @@ export default {
   gap: 8px;
   flex-wrap: wrap;
   margin-top: auto;
+  width: 100%;
 }
 
 .action-btn {
@@ -1332,31 +1493,42 @@ export default {
 }
 
 /* Пустые результаты */
-.empty-results {
+.empty-results,
+.initial-state {
   display: flex;
   justify-content: center;
   align-items: center;
   min-height: 400px;
+  background: var(--bg-card);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border-color);
+  width: 100%;
 }
 
-.empty-state {
+.empty-state,
+.initial-content {
   text-align: center;
   padding: 40px;
+  width: 100%;
 }
 
-.empty-icon {
+.empty-icon,
+.initial-icon {
   font-size: 4rem;
   color: var(--border-color);
   margin-bottom: 20px;
 }
 
-.empty-state h4 {
+.empty-state h4,
+.initial-content h4 {
   margin: 0 0 8px 0;
   color: var(--text-primary);
   font-size: 1.2rem;
 }
 
-.empty-state p {
+.empty-state p,
+.initial-content p {
   margin: 0 0 20px 0;
   color: var(--text-muted);
 }
@@ -1392,19 +1564,46 @@ export default {
   border-top: 1px solid var(--border-color);
 }
 
-/* Адаптивность */
+/* ===== АДАПТИВНОСТЬ ===== */
+
+/* Большие экраны (1400px+) */
+@media (min-width: 1400px) {
+  .players-grid {
+    grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  }
+}
+
+/* Ноутбуки (1200px - 1024px) */
+@media (max-width: 1200px) {
+  .players-content {
+    grid-template-columns: 280px 1fr;
+    gap: 20px;
+    padding: 20px;
+  }
+  
+  .players-grid {
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  }
+  
+  .filters-card {
+    padding: 20px;
+  }
+}
+
+/* Планшеты (1024px и меньше) - ФИЛЬТРЫ СВЕРХУ */
 @media (max-width: 1024px) {
   .players-content {
     grid-template-columns: 1fr;
     gap: 20px;
   }
   
+  /* Фильтры теперь сверху */
   .filters-sidebar {
-    order: 2;
+    order: 1;
   }
   
   .results-area {
-    order: 1;
+    order: 2;
   }
   
   .header-stats {
@@ -1416,8 +1615,28 @@ export default {
   .stat-item {
     display: inline-block;
   }
+  
+  /* Улучшенная кнопка фильтров */
+  .mobile-filters-toggle {
+    display: flex;
+    margin-bottom: 0;
+  }
+  
+  .filters-container {
+    display: none;
+  }
+  
+  .filters-container.mobile-visible {
+    display: flex;
+  }
+  
+  /* На планшетах минимум 2 карточки в строке */
+  .players-grid {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  }
 }
 
+/* Мобильные устройства (768px и меньше) */
 @media (max-width: 768px) {
   .page-header {
     padding: 30px 0;
@@ -1428,16 +1647,19 @@ export default {
   }
   
   .players-content {
-    padding: 20px 15px;
+    padding: 15px;
   }
   
-  .results-header {
-    flex-direction: column;
-    gap: 15px;
-  }
-  
+  /* На мобильных - 1 карточка в строке, занимает всю ширину */
   .players-grid {
     grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  .player-card {
+    margin: 0;
+    width: 100%;
+    max-width: none;
   }
   
   .roles-grid {
@@ -1445,15 +1667,75 @@ export default {
   }
   
   .player-header {
-    flex-direction: column;
-    text-align: center;
+    flex-direction: row;
+    text-align: left;
+    align-items: flex-start;
   }
   
   .player-actions {
-    justify-content: center;
+    justify-content: stretch;
+  }
+  
+  .action-btn {
+    flex: 1;
+    min-width: 0;
   }
 }
 
+/* Средние мобильные (600px - 480px) */
+@media (max-width: 600px) {
+  .page-header {
+    padding: 25px 0;
+  }
+  
+  .page-title {
+    font-size: 1.8rem;
+  }
+  
+  .page-subtitle {
+    font-size: 1rem;
+  }
+  
+  .players-content {
+    padding: 12px;
+    gap: 15px;
+  }
+  
+  .filters-card,
+  .quick-search-card {
+    padding: 16px;
+  }
+  
+  .results-header {
+    padding: 16px 20px;
+  }
+  
+  .player-card {
+    padding: 20px;
+  }
+
+  .results-header {
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .range-inputs {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .range-separator {
+    display: none;
+  }
+  
+  /* На средних мобильных карточка занимает всю доступную ширину */
+  .player-card {
+    margin: 0;
+    width: 100%;
+  }
+}
+
+/* Маленькие мобильные (480px - 360px) */
 @media (max-width: 480px) {
   .page-header {
     padding: 20px 0;
@@ -1463,14 +1745,153 @@ export default {
     font-size: 1.5rem;
   }
   
+  .header-content {
+    padding: 0 15px;
+  }
+  
   .players-content {
-    padding: 15px 10px;
-    gap: 15px;
+    padding: 10px;
   }
   
   .filters-card,
   .quick-search-card {
-    padding: 20px;
+    padding: 12px;
+  }
+  
+  .player-card {
+    padding: 16px;
+    margin: 0;
+    width: 100%;
+  }
+  
+  .player-actions {
+    flex-direction: row;
+  }
+  
+  .action-btn {
+    min-width: 0;
+    flex: 1;
+  }
+  
+  .empty-state,
+  .initial-content {
+    padding: 30px 20px;
+  }
+  
+  .empty-icon,
+  .initial-icon {
+    font-size: 3rem;
+  }
+  
+  /* Улучшаем отображение кнопки фильтров на маленьких экранах */
+  .mobile-filters-toggle {
+    padding: 14px 16px;
+  }
+  
+  .toggle-icon {
+    font-size: 1.1rem;
+  }
+  
+  .toggle-title {
+    font-size: 0.95rem;
+  }
+  
+  .filters-count {
+    font-size: 0.75rem;
+  }
+}
+
+/* Очень маленькие мобильные (< 360px) */
+@media (max-width: 360px) {
+  .page-title {
+    font-size: 1.3rem;
+  }
+  
+  .players-content {
+    padding: 8px;
+  }
+  
+  .player-card {
+    padding: 12px;
+    margin: 0;
+    width: 100%;
+  }
+  
+  .roles-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .quick-search-buttons {
+    gap: 6px;
+  }
+  
+  .quick-search-btn {
+    padding: 6px 10px;
+    font-size: 0.9rem;
+  }
+  
+  /* На очень маленьких экранах улучшаем отображение контента */
+  .player-header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  
+  .player-status {
+    margin-top: 8px;
+  }
+  
+  /* Еще более компактная кнопка фильтров */
+  .mobile-filters-toggle {
+    padding: 12px 14px;
+  }
+  
+  .toggle-content {
+    gap: 10px;
+  }
+  
+  .toggle-icon {
+    font-size: 1rem;
+  }
+}
+
+/* Ландшафтная ориентация для мобильных */
+@media (max-height: 500px) and (max-width: 900px) {
+  .page-header {
+    padding: 20px 0;
+  }
+  
+  .players-content {
+    padding: 15px;
+  }
+  
+  .filters-container.mobile-visible {
+    max-height: 70vh;
+    overflow-y: auto;
+  }
+}
+
+/* Высокие экраны */
+@media (min-height: 800px) and (max-width: 768px) {
+  .empty-results,
+  .initial-state,
+  .loading-container {
+    min-height: 500px;
+  }
+}
+
+/* Улучшение доступности */
+@media (prefers-reduced-motion: reduce) {
+  .player-card,
+  .action-btn,
+  .search-btn,
+  .role-option,
+  .mobile-filters-toggle {
+    transition: none;
+  }
+  
+  .loading-spinner {
+    animation: none;
   }
 }
 </style>

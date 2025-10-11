@@ -1,142 +1,201 @@
 <template>
   <el-dialog
     v-model="dialogVisible"
-    title="Редактировать команду"
-    width="600px"
+    :title="loading ? 'Сохранение...' : 'Редактировать команду'"
+    :width="dialogWidth"
     class="team-edit-dialog"
     @closed="handleClosed"
+    :close-on-click-modal="!loading"
+    :close-on-press-escape="!loading"
   >
+    <!-- Лоадер -->
+    <div v-if="loadingData" class="dialog-loader">
+      <div class="loader-content">
+        <el-icon class="is-loading"><Loading /></el-icon>
+        <span>Загрузка данных команды...</span>
+      </div>
+    </div>
+
+    <!-- Основная форма -->
     <el-form
+      v-else
+      ref="formRef"
       :model="form"
       :rules="rules"
-      ref="formRef"
-      label-width="140px"
-      label-position="left"
+      :label-width="formLabelWidth"
+      :label-position="formLabelPosition"
+      class="edit-form"
     >
-      <el-form-item label="Название" prop="name">
+      <!-- Название команды -->
+      <el-form-item label="Название команды" prop="name" class="form-item">
         <el-input
           v-model="form.name"
           placeholder="Введите название команды"
           size="large"
+          :disabled="loading"
         />
       </el-form-item>
 
-      <el-form-item label="Описание" prop="description">
+      <!-- Описание -->
+      <el-form-item label="Описание" prop="description" class="form-item">
         <el-input
           v-model="form.description"
           type="textarea"
-          :rows="4"
+          :rows="3"
           placeholder="Опишите вашу команду, цели и стиль игры"
           show-word-limit
           maxlength="500"
+          :disabled="loading"
         />
       </el-form-item>
 
-      <el-form-item label="Регион" prop="region">
-        <el-select
-          v-model="form.region"
-          placeholder="Выберите регион"
-          style="width: 100%"
-        >
-          <el-option
-            v-for="region in REGIONS"
-            :key="region.value"
-            :label="region.label"
-            :value="region.value"
-          />
-        </el-select>
-      </el-form-item>
+      <!-- Регион и режимы игры в одной строке на десктопе -->
+      <div class="form-row">
+        <el-form-item label="Регион" prop="region" class="form-item compact">
+          <el-select
+            v-model="form.region"
+            placeholder="Выберите регион"
+            :disabled="loading"
+            class="full-width"
+          >
+            <el-option
+              v-for="region in REGIONS"
+              :key="region.value"
+              :label="region.label"
+              :value="region.value"
+            />
+          </el-select>
+        </el-form-item>
 
-      <el-form-item label="Режимы игры" prop="game_modes">
-        <el-select
-          v-model="form.game_modes"
-          multiple
-          placeholder="Выберите режимы игры"
-          style="width: 100%"
-        >
-          <el-option
-            v-for="mode in GAME_MODES"
-            :key="mode.value"
-            :label="mode.label"
-            :value="mode.value"
-          />
-        </el-select>
-      </el-form-item>
+        <el-form-item label="Режимы игры" prop="game_modes" class="form-item compact">
+          <el-select
+            v-model="form.game_modes"
+            multiple
+            placeholder="Режимы"
+            :disabled="loading"
+            class="full-width"
+          >
+            <el-option
+              v-for="mode in GAME_MODES"
+              :key="mode.value"
+              :label="mode.label"
+              :value="mode.value"
+            />
+          </el-select>
+        </el-form-item>
+      </div>
 
-      <el-form-item label="Диапазон MMR">
+      <!-- Диапазон MMR -->
+      <el-form-item label="Диапазон MMR" class="form-item">
         <div class="mmr-range">
-          <el-input-number
-            v-model="form.mmr_range_min"
-            :min="0"
-            :max="10000"
-            placeholder="Min"
-            controls-position="right"
-          />
-          <span class="range-separator">—</span>
-          <el-input-number
-            v-model="form.mmr_range_max"
-            :min="0"
-            :max="10000"
-            placeholder="Max"
-            controls-position="right"
-          />
+          <div class="mmr-input-group">
+            <el-input-number
+              v-model="form.mmr_range_min"
+              :min="0"
+              :max="10000"
+              placeholder="От"
+              :disabled="loading"
+              controls-position="right"
+              class="mmr-input"
+            />
+            <span class="mmr-separator">—</span>
+            <el-input-number
+              v-model="form.mmr_range_max"
+              :min="0"
+              :max="10000"
+              placeholder="До"
+              :disabled="loading"
+              controls-position="right"
+              class="mmr-input"
+            />
+          </div>
+          <div v-if="showMmrHint" class="mmr-hint">
+            <el-icon><InfoFilled /></el-icon>
+            <span>Диапазон: {{ form.mmr_range_min }} - {{ form.mmr_range_max }} MMR</span>
+          </div>
         </div>
       </el-form-item>
 
-      <el-form-item label="Ищем роли" prop="required_roles">
-        <el-select
-          v-model="form.required_roles"
-          multiple
-          placeholder="Выберите роли"
-          style="width: 100%"
-        >
-          <el-option
-            v-for="role in ROLES"
-            :key="role.value"
-            :label="role.label"
-            :value="role.value"
-          />
-        </el-select>
-      </el-form-item>
+      <!-- Роли и теги в одной строке на десктопе -->
+      <div class="form-row">
+        <el-form-item label="Ищем роли" prop="required_roles" class="form-item compact">
+          <el-select
+            v-model="form.required_roles"
+            multiple
+            placeholder="Роли"
+            :disabled="loading"
+            class="full-width"
+          >
+            <el-option
+              v-for="role in ROLES"
+              :key="role.value"
+              :label="role.label"
+              :value="role.value"
+            />
+          </el-select>
+        </el-form-item>
 
-      <el-form-item label="Теги" prop="tags">
-        <el-select
-          v-model="form.tags"
-          multiple
-          filterable
-          allow-create
-          default-first-option
-          placeholder="Добавьте теги"
-          style="width: 100%"
-        >
-          <el-option
-            v-for="tag in TAGS"
-            :key="tag"
-            :label="tag"
-            :value="tag"
-          />
-        </el-select>
-      </el-form-item>
+        <el-form-item label="Теги" prop="tags" class="form-item compact">
+          <el-select
+            v-model="form.tags"
+            multiple
+            filterable
+            allow-create
+            default-first-option
+            placeholder="Теги"
+            :disabled="loading"
+            class="full-width"
+          >
+            <el-option
+              v-for="tag in TAGS"
+              :key="tag"
+              :label="tag"
+              :value="tag"
+            />
+          </el-select>
+        </el-form-item>
+      </div>
+
+      <!-- Подсказка для тегов -->
+      <div class="form-hint">
+        <el-icon><InfoFilled /></el-icon>
+        <span>Начните вводить текст, чтобы добавить свой тег</span>
+      </div>
     </el-form>
 
+    <!-- Футер диалога -->
     <template #footer>
-      <el-button @click="dialogVisible = false" size="large">
-        Отмена
-      </el-button>
-      <el-button
-        type="primary"
-        @click="handleSave"
-        :loading="loading"
-        size="large"
-      >
-        Сохранить изменения
-      </el-button>
+      <div class="dialog-footer">
+        <el-button 
+          @click="dialogVisible = false" 
+          :disabled="loading"
+          size="large"
+          class="cancel-btn"
+        >
+          Отмена
+        </el-button>
+        <el-button 
+          type="primary" 
+          @click="handleSave"
+          :loading="loading"
+          size="large"
+          class="save-btn"
+        >
+          <template #loading>
+            <el-icon class="is-loading"><Loading /></el-icon>
+            Сохранение...
+          </template>
+          <template v-if="!loading">
+            Сохранить изменения
+          </template>
+        </el-button>
+      </div>
     </template>
   </el-dialog>
 </template>
 
 <script>
-import { ref, watch } from 'vue'
+import { ref, watch, computed, nextTick } from 'vue'
 import { useTeamsStore } from '../../stores/teams'
 import { REGIONS, GAME_MODES, ROLES, TAGS } from '../../utils/constants'
 import { ElMessage } from 'element-plus'
@@ -158,6 +217,7 @@ export default {
     const teamsStore = useTeamsStore()
     const formRef = ref()
     const loading = ref(false)
+    const loadingData = ref(false)
 
     const form = ref({
       name: '',
@@ -172,21 +232,50 @@ export default {
 
     const rules = {
       name: [
-        { required: true, message: 'Пожалуйста, введите название команды', trigger: 'blur' },
-        { min: 3, message: 'Название команды должно быть не менее 3 символов', trigger: 'blur' },
-        { max: 50, message: 'Название команды должно быть не более 50 символов', trigger: 'blur' }
+        { required: true, message: 'Введите название команды', trigger: 'blur' },
+        { min: 3, message: 'Минимум 3 символа', trigger: 'blur' },
+        { max: 50, message: 'Максимум 50 символов', trigger: 'blur' }
       ],
       region: [
-        { required: true, message: 'Пожалуйста, выберите регион', trigger: 'change' }
+        { required: true, message: 'Выберите регион', trigger: 'change' }
       ]
     }
 
     const dialogVisible = ref(props.modelValue)
 
-    watch(() => props.modelValue, (value) => {
+    // Адаптивные вычисляемые свойства
+    const dialogWidth = computed(() => {
+      const width = window.innerWidth
+      if (width < 580) return '95vw'
+      if (width < 640) return '90vw'
+      if (width < 768) return '85vw'
+      if (width < 1024) return '80vw'
+      return '600px'
+    })
+
+    const formLabelWidth = computed(() => {
+      const width = window.innerWidth
+      if (width < 480) return 'auto'
+      if (width < 640) return '100px'
+      return '120px'
+    })
+
+    const formLabelPosition = computed(() => {
+      return window.innerWidth < 480 ? 'top' : 'left'
+    })
+
+    const showMmrHint = computed(() => {
+      return form.value.mmr_range_min && form.value.mmr_range_max
+    })
+
+    watch(() => props.modelValue, async (value) => {
       dialogVisible.value = value
       if (value && props.team) {
+        loadingData.value = true
+        // Имитация загрузки для демонстрации
+        await new Promise(resolve => setTimeout(resolve, 500))
         resetForm()
+        loadingData.value = false
       }
     })
 
@@ -197,12 +286,12 @@ export default {
     const resetForm = () => {
       if (props.team) {
         form.value = {
-          name: props.team.name,
+          name: props.team.name || '',
           description: props.team.description || '',
-          region: props.team.region,
+          region: props.team.region || '',
           game_modes: props.team.game_modes || [],
-          mmr_range_min: props.team.mmr_range_min,
-          mmr_range_max: props.team.mmr_range_max,
+          mmr_range_min: props.team.mmr_range_min || null,
+          mmr_range_max: props.team.mmr_range_max || null,
           required_roles: props.team.required_roles || [],
           tags: props.team.tags || []
         }
@@ -212,11 +301,11 @@ export default {
     const handleSave = async () => {
       if (!formRef.value) return
 
-      const valid = await formRef.value.validate()
-      if (!valid) return
-
-      loading.value = true
       try {
+        const valid = await formRef.value.validate()
+        if (!valid) return
+
+        loading.value = true
         await teamsStore.updateTeam(props.team.id, form.value)
         ElMessage.success('Команда успешно обновлена!')
         emit('saved')
@@ -229,6 +318,7 @@ export default {
     }
 
     const handleClosed = () => {
+      formRef.value?.clearValidate()
       emit('closed')
     }
 
@@ -239,9 +329,14 @@ export default {
       TAGS,
       formRef,
       loading,
+      loadingData,
       form,
       rules,
       dialogVisible,
+      dialogWidth,
+      formLabelWidth,
+      formLabelPosition,
+      showMmrHint,
       handleSave,
       handleClosed
     }
@@ -250,55 +345,324 @@ export default {
 </script>
 
 <style scoped>
-.team-edit-dialog :deep(.el-dialog__body) {
-  padding: 24px;
+.team-edit-dialog {
+  --dialog-padding: 24px;
 }
 
-.team-edit-dialog :deep(.el-form-item) {
+/* Лоадер */
+.dialog-loader {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 200px;
+  color: var(--text-secondary);
+}
+
+.loader-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+}
+
+.loader-content .el-icon {
+  font-size: 1.2rem;
+}
+
+/* Основная форма */
+.edit-form {
+  padding: 0;
+}
+
+.form-item {
   margin-bottom: 20px;
 }
 
-.team-edit-dialog :deep(.el-form-item__label) {
-  font-weight: 600;
-  color: var(--text-primary);
+.form-item.compact {
+  margin-bottom: 0;
 }
 
+/* Строки формы для десктопа */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+/* Диапазон MMR */
 .mmr-range {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.mmr-input-group {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-.range-separator {
-  color: var(--text-muted);
-  font-weight: 600;
+.mmr-input {
+  flex: 1;
 }
 
-.team-edit-dialog :deep(.el-input-number) {
-  width: 120px;
+.mmr-separator {
+  color: var(--text-muted);
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.mmr-hint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.mmr-hint .el-icon {
+  font-size: 0.9rem;
+}
+
+/* Подсказка формы */
+.form-hint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: -8px;
+  margin-bottom: 16px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.form-hint .el-icon {
+  font-size: 0.9rem;
+}
+
+/* Футер диалога */
+.dialog-footer {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.cancel-btn,
+.save-btn {
+  min-width: 120px;
+}
+
+/* Полноширинные элементы */
+.full-width {
+  width: 100%;
+}
+
+/* Адаптивность для планшетов */
+@media (max-width: 1024px) {
+  .team-edit-dialog {
+    --dialog-padding: 20px;
+  }
+  
+  .form-item {
+    margin-bottom: 18px;
+  }
+}
+
+@media (max-width: 768px) {
+  .team-edit-dialog {
+    --dialog-padding: 16px;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 0;
+    margin-bottom: 0;
+  }
+
+  .form-item.compact {
+    margin-bottom: 18px;
+  }
+
+  .mmr-input-group {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .mmr-separator {
+    margin: 4px 0;
+  }
+
+  .dialog-loader {
+    height: 180px;
+  }
+}
+
+/* Адаптивность для мобильных */
+@media (max-width: 640px) {
+  .team-edit-dialog :deep(.el-dialog__header) {
+    padding: 16px 16px 0;
+  }
+
+  .team-edit-dialog :deep(.el-dialog__body) {
+    padding: 16px;
+  }
+
+  .team-edit-dialog :deep(.el-dialog__footer) {
+    padding: 16px;
+  }
+
+  .form-item {
+    margin-bottom: 16px;
+  }
+
+  .form-item.compact {
+    margin-bottom: 16px;
+  }
+
+  .dialog-footer {
+    flex-direction: column-reverse;
+    gap: 8px;
+  }
+
+  .cancel-btn,
+  .save-btn {
+    width: 100%;
+    margin: 0;
+  }
+
+  .dialog-loader {
+    height: 160px;
+  }
+
+  .loader-content {
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .team-edit-dialog :deep(.el-dialog__header) {
+    padding: 12px 12px 0;
+  }
+
+  .team-edit-dialog :deep(.el-dialog__body) {
+    padding: 12px;
+  }
+
+  .team-edit-dialog :deep(.el-dialog__footer) {
+    padding: 12px;
+  }
+
+  .form-item {
+    margin-bottom: 14px;
+  }
+
+  .dialog-loader {
+    height: 140px;
+  }
+
+  .loader-content {
+    flex-direction: column;
+    gap: 4px;
+    text-align: center;
+  }
+}
+
+@media (max-width: 360px) {
+  .team-edit-dialog :deep(.el-dialog__body) {
+    padding: 8px;
+  }
+
+  .form-item {
+    margin-bottom: 12px;
+  }
+
+  .dialog-loader {
+    height: 120px;
+  }
+}
+
+/* Глобальные стили для Element Plus */
+.team-edit-dialog :deep(.el-dialog) {
+  border-radius: var(--border-radius-lg);
+  overflow: hidden;
+}
+
+.team-edit-dialog :deep(.el-dialog__header) {
+  margin: 0;
+  padding: var(--dialog-padding);
+  padding-bottom: 0;
+  border: none;
+}
+
+.team-edit-dialog :deep(.el-dialog__body) {
+  padding: var(--dialog-padding);
+  padding-top: 16px;
+}
+
+.team-edit-dialog :deep(.el-dialog__footer) {
+  padding: var(--dialog-padding);
+  padding-top: 0;
+  border: none;
+}
+
+.team-edit-dialog :deep(.el-form-item__label) {
+  font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.4;
+}
+
+.team-edit-dialog :deep(.el-input__inner),
+.team-edit-dialog :deep(.el-textarea__inner) {
+  border-radius: var(--border-radius);
 }
 
 .team-edit-dialog :deep(.el-select) {
   width: 100%;
 }
 
+/* Состояния загрузки */
+.team-edit-dialog :deep(.el-input.is-disabled .el-input__inner),
+.team-edit-dialog :deep(.el-textarea.is-disabled .el-textarea__inner),
+.team-edit-dialog :deep(.el-select.is-disabled .el-input__inner) {
+  background-color: var(--bg-primary);
+  color: var(--text-muted);
+  cursor: not-allowed;
+}
+
+/* Улучшение доступности */
+@media (prefers-reduced-motion: reduce) {
+  .team-edit-dialog :deep(.el-dialog) {
+    transition: none;
+  }
+}
+
+/* Улучшение скролла на мобильных */
 @media (max-width: 640px) {
   .team-edit-dialog :deep(.el-dialog) {
-    width: 95vw !important;
-    margin: 20px auto;
+    -webkit-overflow-scrolling: touch;
   }
+}
 
-  .team-edit-dialog :deep(.el-form-item) {
-    margin-bottom: 16px;
+/* Предотвращение масштабирования в iOS */
+@media (max-width: 480px) {
+  .team-edit-dialog :deep(.el-input__inner) {
+    font-size: 16px;
   }
+}
 
-  .mmr-range {
-    flex-direction: column;
-    gap: 8px;
+/* Ландшафтный режим для мобильных */
+@media (max-height: 500px) and (orientation: landscape) {
+  .team-edit-dialog :deep(.el-dialog) {
+    height: 90vh;
   }
-
-  .team-edit-dialog :deep(.el-input-number) {
-    width: 100%;
+  
+  .team-edit-dialog :deep(.el-dialog__body) {
+    max-height: 60vh;
+    overflow-y: auto;
+  }
+  
+  .dialog-loader {
+    height: 120px;
   }
 }
 </style>

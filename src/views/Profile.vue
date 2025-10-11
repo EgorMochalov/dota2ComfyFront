@@ -7,47 +7,67 @@
         <div class="user-main-card">
           <div class="user-avatar-section">
             <div class="avatar-container">
-              <el-avatar :size="120" :src="authStore.user?.avatar_url" fit="cover" />
-              <div class="avatar-overlay">
-                <el-upload
-                  action="#"
-                  :show-file-list="false"
-                  :before-upload="beforeAvatarUpload"
-                  :http-request="handleAvatarUpload"
-                  accept="image/jpeg,image/png,image/webp"
-                >
-                  <el-button type="primary" circle :loading="uploadingAvatar">
-                    <el-icon><Camera /></el-icon>
-                  </el-button>
-                </el-upload>
+              <template v-if="!loadingAvatar">
+                <el-avatar :size="120" :src="authStore.user?.avatar_url" fit="cover" />
+                <div class="avatar-overlay">
+                  <el-upload
+                    action="#"
+                    :show-file-list="false"
+                    :before-upload="beforeAvatarUpload"
+                    :http-request="handleAvatarUpload"
+                    accept="image/jpeg,image/png,image/webp"
+                  >
+                    <el-button type="primary" circle :loading="uploadingAvatar">
+                      <el-icon><Camera /></el-icon>
+                    </el-button>
+                  </el-upload>
+                </div>
+              </template>
+              <div v-else class="avatar-skeleton">
+                <div class="skeleton-circle"></div>
               </div>
             </div>
           </div>
           
           <div class="user-basic-info">
-            <h1 class="username">{{ authStore.user?.username }}</h1>
-            <div class="user-stats">
-              <div class="stat-item">
-                <div class="stat-value">{{ authStore.user?.mmr_rating || '0' }}</div>
-                <div class="stat-label">MMR</div>
-              </div>
-              <div class="stat-item">
-                <div class="stat-value">{{ getRegionLabel(authStore.user?.region) }}</div>
-                <div class="stat-label">Регион</div>
-              </div>
-              <div class="stat-item">
-                <div class="stat-value">
-                  <el-tag 
-                    :type="authStore.user?.is_searching ? 'success' : 'info'" 
-                    effect="dark"
-                    class="status-tag"
-                  >
-                    {{ authStore.user?.is_searching ? 'В поиске' : 'Не в поиске' }}
-                  </el-tag>
+            <template v-if="!loadingProfile">
+              <h1 class="username">{{ authStore.user?.username }}</h1>
+              <div class="user-stats">
+                <div class="stat-item">
+                  <div class="stat-value">{{ authStore.user?.mmr_rating || '0' }}</div>
+                  <div class="stat-label">MMR</div>
                 </div>
-                <div class="stat-label">Статус</div>
+                <div class="stat-item">
+                  <div class="stat-value">{{ getRegionLabel(authStore.user?.region) }}</div>
+                  <div class="stat-label">Регион</div>
+                </div>
+                <div class="stat-item">
+                  <div class="stat-value">
+                    <el-tag 
+                      :type="authStore.user?.is_searching ? 'success' : 'info'" 
+                      effect="dark"
+                      class="status-tag"
+                    >
+                      {{ authStore.user?.is_searching ? 'В поиске' : 'Не в поиске' }}
+                    </el-tag>
+                  </div>
+                  <div class="stat-label">Статус</div>
+                </div>
               </div>
-            </div>
+            </template>
+            <template v-else>
+              <div class="username-skeleton">
+                <div class="skeleton-line skeleton-title"></div>
+              </div>
+              <div class="stats-skeleton">
+                <div class="skeleton-stats">
+                  <div class="skeleton-stat" v-for="i in 3" :key="i">
+                    <div class="skeleton-line skeleton-value"></div>
+                    <div class="skeleton-line skeleton-label"></div>
+                  </div>
+                </div>
+              </div>
+            </template>
           </div>
         </div>
       </div>
@@ -56,7 +76,6 @@
     <!-- Основной контент -->
     <div class="profile-content">
       <div class="content-grid">
-        <!-- Левая колонка - Быстрая информация -->
         <!-- Центральная колонка - Настройки профиля -->
         <div class="center-column">
           <el-card class="settings-card" shadow="hover">
@@ -67,7 +86,24 @@
               </div>
             </template>
 
+            <div v-if="loadingProfile" class="form-skeleton">
+              <div class="section-skeleton" v-for="i in 3" :key="i">
+                <div class="skeleton-line skeleton-section-title"></div>
+                <div class="fields-skeleton">
+                  <div class="skeleton-field" v-for="j in 3" :key="j">
+                    <div class="skeleton-line skeleton-label"></div>
+                    <div class="skeleton-input"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="actions-skeleton">
+                <div class="skeleton-button skeleton-primary"></div>
+                <div class="skeleton-button"></div>
+              </div>
+            </div>
+
             <el-form
+              v-else
               :model="profileForm"
               :rules="profileRules"
               ref="profileFormRef"
@@ -220,7 +256,14 @@
                 <el-icon><Star /></el-icon>
               </div>
             </template>
-            <div class="team-preview" @click="$router.push('/my-team')">
+            <div v-if="loadingTeam" class="team-skeleton">
+              <div class="skeleton-circle skeleton-avatar"></div>
+              <div class="team-info-skeleton">
+                <div class="skeleton-line skeleton-team-name"></div>
+                <div class="skeleton-line skeleton-team-members"></div>
+              </div>
+            </div>
+            <div v-else class="team-preview" @click="$router.push('/my-team')">
               <el-avatar :size="50" :src="currentTeam?.avatar_url" />
               <div class="team-info">
                 <h4>{{ currentTeam?.name }}</h4>
@@ -229,6 +272,7 @@
               <el-icon class="team-arrow"><ArrowRight /></el-icon>
             </div>
           </el-card>
+
           <!-- Карточка игровых предпочтений -->
           <el-card class="preferences-card" shadow="hover">
             <template #header>
@@ -237,7 +281,15 @@
                 <el-icon><VideoPlay /></el-icon>
               </div>
             </template>
-            <div class="preferences-content">
+            <div v-if="loadingProfile" class="preferences-skeleton">
+              <div class="preference-skeleton" v-for="i in 3" :key="i">
+                <div class="skeleton-line skeleton-label-small"></div>
+                <div class="tags-skeleton">
+                  <div class="skeleton-tag" v-for="j in 3" :key="j"></div>
+                </div>
+              </div>
+            </div>
+            <div v-else class="preferences-content">
               <div class="preference-item" v-if="profileForm.game_modes.length">
                 <strong>Режимы:</strong>
                 <div class="tags-container">
@@ -307,13 +359,9 @@ import { REGIONS, GAME_MODES, ROLES, TAGS } from '../utils/constants'
 import { ElMessage } from 'element-plus'
 import {
   Camera,
-  Opportunity,
   Star,
-  DataAnalysis,
   Setting,
-  Search,
   VideoPlay,
-  Lightning,
   User,
   ChatDotRound,
   ArrowRight,
@@ -324,13 +372,9 @@ export default {
   name: 'Profile',
   components: {
     Camera,
-    Opportunity,
     Star,
-    DataAnalysis,
     Setting,
-    Search,
     VideoPlay,
-    Lightning,
     User,
     ChatDotRound,
     ArrowRight,
@@ -344,7 +388,9 @@ export default {
     const profileFormRef = ref()
     const uploadingAvatar = ref(false)
     const updating = ref(false)
-    const updatingSearchStatus = ref(false)
+    const loadingProfile = ref(true)
+    const loadingTeam = ref(false)
+    const loadingAvatar = ref(false)
     const currentTeam = ref(null)
 
     const profileForm = ref({
@@ -356,8 +402,6 @@ export default {
       about_me: '',
       tags: []
     })
-
-    const isSearching = ref(authStore.user?.is_searching || false)
 
     const profileRules = {
       username: [
@@ -412,6 +456,7 @@ export default {
 
     const handleAvatarUpload = async (options) => {
       uploadingAvatar.value = true
+      loadingAvatar.value = true
       try {
         await usersStore.uploadAvatar(options.file)
         await authStore.getCurrentUser()
@@ -420,6 +465,7 @@ export default {
         // Ошибка уже обработана в store
       } finally {
         uploadingAvatar.value = false
+        loadingAvatar.value = false
       }
     }
 
@@ -441,20 +487,6 @@ export default {
       }
     }
 
-    const updateSearchStatus = async (value) => {
-      updatingSearchStatus.value = true
-      try {
-        await usersStore.updateSearchStatus({ is_searching: value })
-        authStore.user.is_searching = value
-        ElMessage.success(`Статус поиска обновлен: ${value ? 'В поиске' : 'Не в поиске'}`)
-      } catch (error) {
-        isSearching.value = !value
-        ElMessage.error('Ошибка обновления статуса поиска')
-      } finally {
-        updatingSearchStatus.value = false
-      }
-    }
-
     const resetForm = () => {
       if (authStore.user) {
         profileForm.value = {
@@ -466,23 +498,37 @@ export default {
           about_me: authStore.user.about_me || '',
           tags: authStore.user.tags || []
         }
-        isSearching.value = authStore.user.is_searching || false
       }
     }
 
     const loadTeamData = async () => {
       if (authStore.user?.team_id) {
+        loadingTeam.value = true
         try {
           currentTeam.value = await teamsStore.getTeam(authStore.user.team_id)
         } catch (error) {
           console.error('Error loading team data:', error)
+        } finally {
+          loadingTeam.value = false
         }
       }
     }
 
+    const loadProfileData = async () => {
+      loadingProfile.value = true
+      try {
+        await authStore.getCurrentUser()
+        resetForm()
+        await loadTeamData()
+      } catch (error) {
+        ElMessage.error('Ошибка загрузки профиля')
+      } finally {
+        loadingProfile.value = false
+      }
+    }
+
     onMounted(() => {
-      resetForm()
-      loadTeamData()
+      loadProfileData()
     })
 
     return {
@@ -494,11 +540,12 @@ export default {
       profileFormRef,
       uploadingAvatar,
       updating,
-      updatingSearchStatus,
       profileForm,
-      isSearching,
       profileRules,
       currentTeam,
+      loadingProfile,
+      loadingTeam,
+      loadingAvatar,
       getRegionLabel,
       getGameModeLabel,
       getRoleLabel,
@@ -506,7 +553,6 @@ export default {
       beforeAvatarUpload,
       handleAvatarUpload,
       handleUpdateProfile,
-      updateSearchStatus,
       resetForm
     }
   }
@@ -517,13 +563,14 @@ export default {
 .profile-page {
   min-height: 100vh;
   background: var(--bg-primary);
+  overflow-x: hidden;
 }
 
 /* Hero секция */
 .profile-hero {
   position: relative;
   background: var(--primary-gradient);
-  padding: 60px 0 80px;
+  padding: 40px 0 60px;
   overflow: hidden;
 }
 
@@ -547,16 +594,17 @@ export default {
 .user-main-card {
   display: flex;
   align-items: center;
-  gap: 40px;
+  gap: 30px;
   color: white;
 }
 
 .avatar-container {
   position: relative;
   border-radius: 50%;
-  padding: 8px;
+  padding: 6px;
   background: rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(10px);
+  flex-shrink: 0;
 }
 
 .avatar-overlay {
@@ -567,32 +615,37 @@ export default {
 
 .user-basic-info {
   flex: 1;
+  min-width: 0;
 }
 
 .username {
-  font-size: 2.5rem;
+  font-size: 2rem;
   font-weight: 700;
-  margin: 0 0 20px 0;
+  margin: 0 0 16px 0;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  word-wrap: break-word;
 }
 
 .user-stats {
   display: flex;
-  gap: 40px;
+  gap: 30px;
+  flex-wrap: wrap;
 }
 
 .stat-item {
   text-align: center;
+  flex: 1;
+  min-width: 80px;
 }
 
 .stat-value {
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   font-weight: 600;
-  margin-bottom: 5px;
+  margin-bottom: 4px;
 }
 
 .stat-label {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   opacity: 0.9;
 }
 
@@ -601,17 +654,143 @@ export default {
   font-weight: 500;
 }
 
+/* Улучшенные скелетоны */
+.skeleton-circle {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: linear-gradient(90deg, rgba(255,255,255,0.1) 25%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0.1) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+}
+
+.skeleton-line {
+  background: linear-gradient(90deg, rgba(255,255,255,0.1) 25%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0.1) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+  border-radius: 4px;
+}
+
+.skeleton-title {
+  height: 40px;
+  width: 200px;
+  margin-bottom: 16px;
+}
+
+.skeleton-stats {
+  display: flex;
+  gap: 30px;
+  flex-wrap: wrap;
+}
+
+.skeleton-stat {
+  text-align: center;
+  flex: 1;
+  min-width: 80px;
+}
+
+.skeleton-value {
+  height: 24px;
+  width: 60px;
+  margin: 0 auto 6px;
+}
+
+.skeleton-label {
+  height: 16px;
+  width: 50px;
+  margin: 0 auto;
+}
+
+.skeleton-section-title {
+  height: 24px;
+  width: 160px;
+  margin-bottom: 20px;
+}
+
+.skeleton-field {
+  margin-bottom: 20px;
+}
+
+.skeleton-input {
+  height: 40px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+  border-radius: 8px;
+  margin-top: 8px;
+}
+
+.skeleton-button {
+  height: 44px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+}
+
+.skeleton-primary {
+  background: linear-gradient(90deg, rgba(102,126,234,0.2) 25%, rgba(102,126,234,0.3) 50%, rgba(102,126,234,0.2) 75%);
+}
+
+.skeleton-avatar {
+  width: 50px;
+  height: 50px;
+}
+
+.skeleton-team-name {
+  height: 20px;
+  width: 120px;
+  margin-bottom: 6px;
+}
+
+.skeleton-team-members {
+  height: 16px;
+  width: 80px;
+}
+
+.skeleton-label-small {
+  height: 16px;
+  width: 80px;
+  margin-bottom: 8px;
+}
+
+.skeleton-tag {
+  height: 24px;
+  width: 60px;
+  border-radius: 12px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+  margin-right: 6px;
+  margin-bottom: 6px;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.username-skeleton,
+.stats-skeleton {
+  margin-bottom: 20px;
+}
+
 /* Основной контент */
 .profile-content {
   max-width: 1200px;
-  margin: -40px auto 0;
+  margin: -30px auto 0;
   padding: 0 20px 40px;
   position: relative;
+  box-sizing: border-box;
 }
 
 .content-grid {
   display: grid;
-  grid-template-columns:1fr 300px;
+  grid-template-columns: 1fr 300px;
   gap: 24px;
   align-items: start;
 }
@@ -619,22 +798,19 @@ export default {
 /* Карточки */
 .info-card,
 .settings-card,
-.status-card,
-.preferences-card,
-.actions-card {
+.preferences-card {
   border: none;
   border-radius: var(--border-radius-lg);
   background: var(--bg-card);
   box-shadow: var(--shadow-md);
   transition: all var(--transition-normal);
   margin-bottom: 24px;
+  overflow: hidden;
 }
 
 .info-card:hover,
 .settings-card:hover,
-.status-card:hover,
-.preferences-card:hover,
-.actions-card:hover {
+.preferences-card:hover {
   box-shadow: var(--shadow-lg);
   transform: translateY(-2px);
 }
@@ -643,8 +819,9 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 !important;
+  padding: 20px 24px !important;
   border: none !important;
+  background: var(--bg-secondary);
 }
 
 .card-header h2,
@@ -652,6 +829,7 @@ export default {
   margin: 0;
   color: var(--text-primary);
   font-weight: 600;
+  font-size: 1.2rem;
 }
 
 .card-header .el-icon {
@@ -659,101 +837,70 @@ export default {
   font-size: 1.2rem;
 }
 
-/* Левая колонка */
-.status-content {
+/* Скелетоны */
+.form-skeleton {
+  padding: 24px;
+}
+
+.section-skeleton {
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.fields-skeleton {
+  padding-left: 0;
+}
+
+.actions-skeleton {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border-color);
+}
+
+.team-skeleton {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+}
+
+.team-info-skeleton {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
 }
 
-.status-item {
+.preferences-skeleton {
+  padding: 16px 24px;
   display: flex;
-  align-items: center;
-  gap: 12px;
+  flex-direction: column;
+  gap: 20px;
 }
 
-.status-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-}
-
-.status-dot.online {
-  background: var(--success-gradient);
-}
-
-.status-dot.active {
-  background: var(--warning-gradient);
-}
-
-.team-preview {
+.preference-skeleton {
   display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px;
-  border-radius: var(--border-radius);
-  background: var(--bg-primary);
-  cursor: pointer;
-  transition: all var(--transition-fast);
+  flex-direction: column;
+  gap: 8px;
 }
 
-.team-preview:hover {
-  background: var(--primary-color);
-  color: white;
-}
-
-.team-preview:hover .team-arrow {
-  color: white;
-}
-
-.team-info h4 {
-  margin: 0 0 4px 0;
-  font-size: 1rem;
-}
-
-.team-info p {
-  margin: 0;
-  font-size: 0.8rem;
-  opacity: 0.7;
-}
-
-.team-arrow {
-  margin-left: auto;
-  color: var(--text-muted);
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-}
-
-.mini-stat {
-  text-align: center;
-  padding: 12px;
-  background: var(--bg-primary);
-  border-radius: var(--border-radius);
-}
-
-.mini-stat-value {
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: var(--primary-color);
-  margin-bottom: 4px;
-}
-
-.mini-stat-label {
-  font-size: 0.75rem;
-  color: var(--text-muted);
+.tags-skeleton {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 
 /* Центральная колонка */
 .settings-card {
-  grid-column: 2;
+  grid-column: 1;
 }
 
 .profile-form {
-  padding: 8px 0;
+  padding: 8px 24px 24px;
 }
 
 .form-section {
@@ -779,6 +926,7 @@ export default {
 :deep(.el-form-item__label) {
   font-weight: 500;
   color: var(--text-secondary);
+  margin-bottom: 8px;
 }
 
 :deep(.el-input__inner),
@@ -813,6 +961,7 @@ export default {
   border-radius: var(--border-radius);
   font-weight: 500;
   padding: 12px 24px;
+  min-width: 180px;
 }
 
 .save-button:hover {
@@ -823,36 +972,61 @@ export default {
 .reset-button {
   border-radius: var(--border-radius);
   padding: 12px 24px;
+  min-width: 120px;
 }
 
 /* Правая колонка */
-.search-status-content {
-  text-align: center;
-}
-
-.status-toggle {
+.team-preview {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
+  gap: 12px;
+  padding: 16px;
+  border-radius: var(--border-radius);
+  background: var(--bg-primary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
 }
 
-.status-label {
-  font-weight: 500;
-  color: var(--text-primary);
+.team-preview:hover {
+  background: var(--primary-color);
+  color: white;
 }
 
-.status-description {
+.team-preview:hover .team-arrow {
+  color: white;
+}
+
+.team-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.team-info h4 {
+  margin: 0 0 4px 0;
+  font-size: 1rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.team-info p {
   margin: 0;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
+  opacity: 0.7;
+}
+
+.team-arrow {
+  margin-left: auto;
   color: var(--text-muted);
-  line-height: 1.4;
+  flex-shrink: 0;
 }
 
 .preferences-content {
+  padding: 8px 0;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
 }
 
 .preference-item {
@@ -864,6 +1038,7 @@ export default {
 .preference-item strong {
   color: var(--text-secondary);
   font-size: 0.9rem;
+  font-weight: 600;
 }
 
 .tags-container {
@@ -879,37 +1054,20 @@ export default {
 
 .empty-state {
   text-align: center;
-  padding: 20px;
+  padding: 30px 20px;
   color: var(--text-muted);
 }
 
 .empty-state .el-icon {
-  font-size: 2rem;
-  margin-bottom: 8px;
+  font-size: 2.5rem;
+  margin-bottom: 12px;
   opacity: 0.5;
 }
 
 .empty-state p {
   margin: 0;
   font-size: 0.9rem;
-}
-
-.actions-content {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.action-button {
-  justify-content: flex-start;
-  padding: 12px 16px;
-  border-radius: var(--border-radius);
-  font-weight: 500;
-  transition: all var(--transition-fast);
-}
-
-.action-button:hover {
-  transform: translateX(4px);
+  line-height: 1.4;
 }
 
 /* Адаптивность */
@@ -919,7 +1077,6 @@ export default {
     gap: 20px;
   }
   
-  .left-column,
   .right-column {
     order: 2;
   }
@@ -929,9 +1086,9 @@ export default {
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 900px) {
   .profile-hero {
-    padding: 40px 0 60px;
+    padding: 30px 0 50px;
   }
   
   .user-main-card {
@@ -942,30 +1099,248 @@ export default {
   
   .user-stats {
     justify-content: center;
+    gap: 20px;
   }
   
   .username {
-    font-size: 2rem;
+    font-size: 1.8rem;
   }
   
   .profile-content {
     margin-top: -20px;
-    padding: 0 16px 20px;
+    padding: 0 16px 30px;
+  }
+  
+  .content-grid {
+    gap: 16px;
+  }
+  
+  .card-header {
+    padding: 16px 20px !important;
+  }
+  
+  .card-header h2,
+  .card-header h3 {
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-content {
+    padding: 0 16px;
+  }
+  
+  .profile-content {
+    padding: 0 12px 20px;
   }
   
   .form-actions {
     flex-direction: column;
   }
+  
+  .save-button,
+  .reset-button {
+    width: 100%;
+    min-width: auto;
+  }
+  
+  .user-stats {
+    gap: 15px;
+  }
+  
+  .stat-item {
+    min-width: 70px;
+  }
+  
+  .stat-value {
+    font-size: 1.2rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .profile-hero {
+    padding: 25px 0 40px;
+  }
+  
+  .username {
+    font-size: 1.6rem;
+  }
+  
+  .avatar-container {
+    padding: 4px;
+  }
+  
+  .skeleton-circle {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .skeleton-title {
+    width: 160px;
+    height: 32px;
+  }
+  
+  .user-stats {
+    flex-direction: column;
+    gap: 15px;
+    align-items: center;
+  }
+  
+  .stat-item {
+    min-width: 100px;
+  }
+  
+  .profile-form {
+    padding: 8px 16px 16px;
+  }
+  
+  .form-section {
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+  }
+  
+  .section-title {
+    font-size: 1rem;
+    margin-bottom: 16px;
+  }
+  
+  :deep(.el-form-item__label) {
+    margin-bottom: 6px;
+    font-size: 0.9rem;
+  }
+  
+  .team-preview {
+    padding: 12px;
+  }
+  
+  .preference-item {
+    gap: 6px;
+  }
+  
+  .tags-container {
+    gap: 4px;
+  }
 }
 
 @media (max-width: 480px) {
-  .user-stats {
+  .hero-content {
+    padding: 0 12px;
+  }
+
+  .asterisk-left {
+    display: flex;
     flex-direction: column;
+  }
+  
+  .profile-content {
+    padding: 0 8px 16px;
+  }
+  
+  .username {
+    font-size: 1.4rem;
+  }
+  
+  .user-main-card {
     gap: 20px;
   }
   
-  .stats-grid {
-    grid-template-columns: 1fr;
+  .card-header {
+    padding: 12px 16px !important;
+  }
+  
+  .card-header h2,
+  .card-header h3 {
+    font-size: 1rem;
+  }
+  
+  .profile-form {
+    padding: 0 12px 12px;
+  }
+  
+  .form-actions {
+    margin-top: 24px;
+    padding-top: 20px;
+  }
+  
+  .empty-state {
+    padding: 20px 16px;
+  }
+  
+  .empty-state .el-icon {
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .username {
+    font-size: 1.3rem;
+  }
+  
+  .profile-content {
+    margin-top: -15px;
+  }
+  
+  .skeleton-circle {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .skeleton-title {
+    width: 140px;
+    height: 28px;
+  }
+  
+  .stat-value {
+    font-size: 1.1rem;
+  }
+}
+
+/* Улучшение доступности */
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-circle,
+  .skeleton-line,
+  .skeleton-input,
+  .skeleton-button,
+  .skeleton-tag {
+    animation: none;
+  }
+  
+  .info-card,
+  .settings-card,
+  .preferences-card,
+  .team-preview,
+  .save-button {
+    transition: none;
+  }
+  
+  .info-card:hover,
+  .settings-card:hover,
+  .preferences-card:hover,
+  .team-preview:hover,
+  .save-button:hover {
+    transform: none;
+  }
+}
+
+/* Исправление выхода за экран */
+.profile-page,
+.profile-hero,
+.profile-content,
+.hero-content {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.content-grid,
+.user-main-card,
+.user-stats {
+  max-width: 100%;
+}
+
+/* Улучшение скролла */
+@media (max-width: 768px) {
+  .profile-page {
+    -webkit-overflow-scrolling: touch;
   }
 }
 </style>

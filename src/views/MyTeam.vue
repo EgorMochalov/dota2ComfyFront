@@ -1,24 +1,34 @@
 <template>
   <div class="my-team-page">
+    <!-- Лоадер -->
+    <div v-if="loading" class="loading-container">
+      <div class="loader-content">
+        <el-icon class="is-loading loader-icon"><Loading /></el-icon>
+        <p>Загрузка информации о команде...</p>
+      </div>
+    </div>
+
     <!-- Hero Section -->
-    <div v-if="currentTeam" class="team-hero">
+    <div v-else-if="currentTeam" class="team-hero">
       <div class="hero-background"></div>
       <div class="hero-content">
         <div class="team-identity">
-          <div class="avatar-container">
-            <el-avatar :size="120" :src="currentTeam.avatar_url" class="team-avatar" />
-            <div class="avatar-overlay" v-if="isCaptain">
-              <el-upload
-                action="#"
-                :show-file-list="false"
-                :before-upload="beforeAvatarUpload"
-                :http-request="handleTeamAvatarUpload"
-                accept="image/jpeg,image/png,image/webp"
-              >
-                <el-button type="primary" circle :loading="uploadingAvatar">
-                  <el-icon><Camera /></el-icon>
-                </el-button>
-              </el-upload>
+          <div class="avatar-section">
+            <div class="avatar-container">
+              <el-avatar :size="120" :src="currentTeam.avatar_url" class="team-avatar" />
+              <div class="avatar-overlay" v-if="isCaptain">
+                <el-upload
+                  action="#"
+                  :show-file-list="false"
+                  :before-upload="beforeAvatarUpload"
+                  :http-request="handleTeamAvatarUpload"
+                  accept="image/jpeg,image/png,image/webp"
+                >
+                  <el-button type="primary" circle :loading="uploadingAvatar">
+                    <el-icon><Camera /></el-icon>
+                  </el-button>
+                </el-upload>
+              </div>
             </div>
           </div>
           <div class="team-info">
@@ -74,7 +84,7 @@
     </div>
 
     <!-- Main Content -->
-    <div v-if="currentTeam" class="team-main">
+    <div v-if="!loading && currentTeam" class="team-main">
       <div class="container">
         <!-- Quick Stats -->
         <div class="quick-stats">
@@ -155,7 +165,7 @@
     </div>
 
     <!-- No Team State -->
-    <div v-else class="no-team-state">
+    <div v-else-if="!loading && !currentTeam" class="no-team-state">
       <div class="empty-state">
         <div class="empty-icon">
           <el-icon><Mouse /></el-icon>
@@ -243,7 +253,8 @@ import {
   DataAnalysis,
   Mouse,
   Warning,
-  InfoFilled
+  InfoFilled,
+  Loading
 } from '@element-plus/icons-vue'
 
 // Components
@@ -268,6 +279,7 @@ export default {
     Mouse,
     Warning,
     InfoFilled,
+    Loading,
     TeamMembers,
     TeamApplications,
     TeamInvitations,
@@ -281,6 +293,7 @@ export default {
     const applicationsStore = useApplicationsStore()
 
     const currentTeam = ref(null)
+    const loading = ref(true)
     const activeTab = ref('members')
     const applicationsCount = ref(0)
 
@@ -312,7 +325,10 @@ export default {
     }
 
     const loadTeamData = async () => {
-      if (!authStore.user?.team_id) return
+      if (!authStore.user?.team_id) {
+        loading.value = false
+        return
+      }
 
       try {
         currentTeam.value = await teamsStore.getTeam(authStore.user.team_id)
@@ -321,6 +337,8 @@ export default {
         }
       } catch (error) {
         ElMessage.error('Ошибка загрузки данных команды')
+      } finally {
+        loading.value = false
       }
     }
 
@@ -438,14 +456,13 @@ export default {
     }
 
     onMounted(() => {
-      if (authStore.user?.team_id) {
-        loadTeamData()
-      }
+      loadTeamData()
     })
 
     return {
       authStore,
       currentTeam,
+      loading,
       activeTab,
       applicationsCount,
       editTeamDialog,
@@ -481,6 +498,31 @@ export default {
   background: var(--bg-primary);
 }
 
+/* Лоадер */
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh;
+  padding: 40px 20px;
+}
+
+.loader-content {
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.loader-icon {
+  font-size: 3rem;
+  margin-bottom: 16px;
+  color: var(--primary-color);
+}
+
+.loader-content p {
+  font-size: 1.1rem;
+  margin: 0;
+}
+
 /* Hero Section */
 .team-hero {
   position: relative;
@@ -507,6 +549,7 @@ export default {
   padding: 0 20px;
   display: flex;
   justify-content: space-between;
+  align-items: center;
   gap: 40px;
 }
 
@@ -515,6 +558,10 @@ export default {
   align-items: center;
   gap: 30px;
   flex: 1;
+}
+
+.avatar-section {
+  flex-shrink: 0;
 }
 
 .avatar-container {
@@ -537,6 +584,7 @@ export default {
 
 .team-info {
   flex: 1;
+  min-width: 0;
 }
 
 .team-name {
@@ -544,6 +592,8 @@ export default {
   font-weight: 700;
   margin-bottom: 8px;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  word-wrap: break-word;
+  line-height: 1.2;
 }
 
 .team-description {
@@ -551,6 +601,7 @@ export default {
   opacity: 0.9;
   margin-bottom: 20px;
   max-width: 500px;
+  word-wrap: break-word;
 }
 
 .team-meta {
@@ -565,6 +616,7 @@ export default {
   gap: 8px;
   font-size: 0.9rem;
   opacity: 0.8;
+  flex-shrink: 0;
 }
 
 .team-actions {
@@ -581,6 +633,7 @@ export default {
   padding: 12px 20px;
   border-radius: var(--border-radius);
   transition: all var(--transition-normal);
+  white-space: nowrap;
 }
 
 .action-btn:hover {
@@ -603,7 +656,7 @@ export default {
 /* Quick Stats */
 .quick-stats {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 20px;
   margin-bottom: 30px;
 }
@@ -635,6 +688,7 @@ export default {
   justify-content: center;
   font-size: 24px;
   color: white;
+  flex-shrink: 0;
 }
 
 .stat-icon.members {
@@ -651,6 +705,7 @@ export default {
 
 .stat-info {
   flex: 1;
+  min-width: 0;
 }
 
 .stat-value {
@@ -676,12 +731,15 @@ export default {
   display: flex;
   gap: 30px;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .toggle-item {
   display: flex;
   align-items: center;
   gap: 12px;
+  flex: 1;
+  min-width: 200px;
 }
 
 /* Navigation */
@@ -696,31 +754,31 @@ export default {
   padding: 0;
 }
 
-.team-tabs :deep(.el-tabs__header) {
+:deep(.team-tabs .el-tabs__header) {
   background: linear-gradient(135deg, #f8fafc 0%, var(--bg-card) 100%);
   padding: 0 24px;
   margin: 0;
 }
 
-.team-tabs :deep(.el-tabs__nav-wrap) {
+:deep(.team-tabs .el-tabs__nav-wrap) {
   padding-bottom: 0;
 }
 
-.team-tabs :deep(.el-tabs__item) {
+:deep(.team-tabs .el-tabs__item) {
   padding: 20px 24px;
   font-weight: 600;
   transition: all var(--transition-fast);
 }
 
-.team-tabs :deep(.el-tabs__item:hover) {
+:deep(.team-tabs .el-tabs__item:hover) {
   color: var(--primary-color);
 }
 
-.team-tabs :deep(.el-tabs__item.is-active) {
+:deep(.team-tabs .el-tabs__item.is-active) {
   color: var(--primary-color);
 }
 
-.team-tabs :deep(.el-tabs__active-bar) {
+:deep(.team-tabs .el-tabs__active-bar) {
   background: var(--primary-gradient);
   height: 3px;
 }
@@ -762,16 +820,18 @@ export default {
   color: var(--text-muted);
   margin-bottom: 30px;
   font-size: 1.1rem;
+  line-height: 1.5;
 }
 
 .empty-actions {
   display: flex;
   gap: 16px;
   justify-content: center;
+  flex-wrap: wrap;
 }
 
 /* Dialogs */
-.danger-dialog :deep(.el-dialog__header) {
+:deep(.danger-dialog .el-dialog__header) {
   background: linear-gradient(135deg, #fef2f2 0%, #fef2f2 100%);
 }
 
@@ -783,23 +843,43 @@ export default {
 .dialog-content h3 {
   margin: 16px 0 8px;
   color: var(--text-primary);
+  font-size: 1.2rem;
 }
 
 .dialog-content p {
   color: var(--text-muted);
   line-height: 1.6;
+  margin: 0;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
+/* Адаптивность */
+@media (max-width: 1200px) {
+  .hero-content {
+    max-width: 100%;
+    padding: 0 24px;
+  }
+  
+  .container {
+    max-width: 100%;
+    padding: 0 24px;
+  }
+}
+
+@media (max-width: 992px) {
   .hero-content {
     flex-direction: column;
     text-align: center;
     gap: 30px;
+    padding: 0 20px;
   }
 
   .team-identity {
     flex-direction: column;
+    text-align: center;
+    gap: 24px;
+  }
+
+  .team-info {
     text-align: center;
   }
 
@@ -807,53 +887,264 @@ export default {
     justify-content: center;
   }
 
+  .team-actions {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 768px) {
+  .team-hero {
+    padding: 40px 0 30px;
+  }
+  
+  .team-name {
+    font-size: 2rem;
+  }
+  
   .quick-stats {
     grid-template-columns: 1fr;
+    gap: 16px;
   }
-
+  
   .status-toggle {
     flex-direction: column;
     gap: 20px;
     align-items: stretch;
+    padding: 20px;
   }
-
+  
+  .toggle-item {
+    min-width: auto;
+    justify-content: space-between;
+  }
+  
   .empty-actions {
     flex-direction: column;
+    align-items: center;
   }
-
+  
   .team-actions {
     flex-direction: column;
     width: 100%;
   }
-
+  
   .action-btn {
     width: 100%;
+    justify-content: center;
+  }
+  
+  .container {
+    padding: 0 16px;
+  }
+  
+  .loading-container {
+    padding: 30px 16px;
+    min-height: 50vh;
+  }
+}
+
+@media (max-width: 576px) {
+  .team-hero {
+    padding: 30px 0 25px;
+  }
+  
+  .hero-content {
+    padding: 0 16px;
+    gap: 24px;
+  }
+  
+  .team-name {
+    font-size: 1.8rem;
+  }
+  
+  .team-description {
+    font-size: 1rem;
+  }
+  
+  .team-meta {
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+  }
+  
+  .stat-card {
+    padding: 20px;
+    flex-direction: column;
+    text-align: center;
+    gap: 12px;
+  }
+  
+  .stat-value {
+    font-size: 1.5rem;
+  }
+  
+  .stat-icon {
+    width: 50px;
+    height: 50px;
+    font-size: 20px;
+  }
+  
+  :deep(.team-tabs .el-tabs__header) {
+    padding: 0 16px;
+  }
+  
+  :deep(.team-tabs .el-tabs__item) {
+    padding: 16px 20px;
+    font-size: 0.9rem;
+  }
+  
+  .no-team-state {
+    padding: 30px 16px;
+  }
+  
+  .empty-icon {
+    width: 100px;
+    height: 100px;
+    font-size: 40px;
+  }
+  
+  .empty-state h2 {
+    font-size: 1.5rem;
+  }
+  
+  .loader-icon {
+    font-size: 2.5rem;
   }
 }
 
 @media (max-width: 480px) {
+  .team-hero {
+    padding: 25px 0 20px;
+  }
+  
+  .hero-content {
+    padding: 0 12px;
+  }
+  
   .team-name {
+    font-size: 1.6rem;
+  }
+  
+  .team-avatar {
+    width: 80px !important;
+    height: 80px !important;
+  }
+  
+  .container {
+    padding: 0 12px;
+  }
+  
+  .stat-card {
+    padding: 16px;
+  }
+  
+  .status-toggle {
+    padding: 16px;
+  }
+  
+  .toggle-item {
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-start;
+  }
+  
+  :deep(.team-tabs .el-tabs__item) {
+    padding: 12px 16px;
+    font-size: 0.85rem;
+  }
+  
+  .loading-container {
+    padding: 20px 12px;
+  }
+  
+  .loader-icon {
     font-size: 2rem;
   }
-
-  .team-hero {
-    padding: 40px 0 30px;
+  
+  .loader-content p {
+    font-size: 1rem;
   }
+}
 
-  .hero-content {
-    padding: 0 16px;
+/* Улучшение доступности */
+@media (prefers-reduced-motion: reduce) {
+  .stat-card,
+  .action-btn,
+  .team-avatar,
+  .avatar-overlay {
+    transition: none;
   }
-
-  .container {
-    padding: 0 16px;
+  
+  .stat-card:hover,
+  .action-btn:hover {
+    transform: none;
   }
+}
 
-  .stat-card {
-    padding: 20px;
+/* Исправление выхода за экран */
+.my-team-page,
+.team-hero,
+.team-main,
+.hero-content,
+.container {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.team-identity,
+.team-meta,
+.team-actions,
+.quick-stats {
+  max-width: 100%;
+}
+
+/* Улучшение скролла на мобильных */
+@media (max-width: 768px) {
+  .my-team-page {
+    -webkit-overflow-scrolling: touch;
   }
+}
 
+/* Улучшение отображения текста */
+.team-name,
+.team-description,
+.stat-value,
+.stat-label {
+  word-break: break-word;
+}
+
+/* Адаптивность для очень маленьких экранов */
+@media (max-width: 360px) {
+  .team-name {
+    font-size: 1.4rem;
+  }
+  
+  .team-description {
+    font-size: 0.9rem;
+  }
+  
+  .empty-icon {
+    width: 80px;
+    height: 80px;
+    font-size: 32px;
+  }
+  
+  .empty-state h2 {
+    font-size: 1.3rem;
+  }
+  
+  .empty-state p {
+    font-size: 1rem;
+  }
+  
   .stat-value {
-    font-size: 1.5rem;
+    font-size: 1.3rem;
+  }
+  
+  :deep(.team-tabs .el-tabs__item) {
+    padding: 10px 12px;
+    font-size: 0.8rem;
   }
 }
 </style>

@@ -1,12 +1,17 @@
 <template>
   <div class="chat-container">
     <!-- Сайдбар с чатами -->
-    <div class="chat-sidebar">
+    <div class="chat-sidebar" :class="{ 'sidebar-collapsed': !isSidebarVisible }">
       <div class="sidebar-header">
-        <div class="header-content">
+        <div class="header-content" v-show="isSidebarVisible">
           <h3>Чаты</h3>
+          <button @click="()=>toggleSidebar(false)" class="toggle-sidebar-btn">
+            <svg class="toggle-icon" viewBox="0 0 24 24" fill="none">
+              <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
         </div>
-        <div class="search-container">
+        <div v-show="isSidebarVisible" class="search-container">
           <el-input
             placeholder="Поиск чатов..."
             prefix-icon="Search"
@@ -15,59 +20,87 @@
         </div>
       </div>
       
-      <div class="chats-list">
-        <div
-          v-for="room in chatStore.rooms"
-          :key="room.id"
-          class="chat-item"
-          :class="{ 
-            active: activeRoom?.id === room.id,
-            unread: room.unread_count > 0
-          }"
-          @click="selectRoom(room)"
-        >
-          <div class="chat-item-content">
-            <div class="avatar-container">
-              <el-avatar 
-                :size="52" 
-                :src="getRoomAvatar(room)" 
-                class="chat-avatar"
-                :class="{ 'online-indicator': getRoomParticipant(room)?.is_online }"
-              />
-              <div v-if="room.unread_count > 0" class="unread-indicator">
-                {{ room.unread_count > 99 ? '99+' : room.unread_count }}
-              </div>
-            </div>
-            
-            <div class="chat-details">
-              <div class="chat-meta">
-                <div class="chat-name-time">
-                  <span class="chat-name">{{ getRoomName(room) }}</span>
-                  <span class="chat-time">{{ formatTime(room.last_message?.createdAt) }}</span>
+      <div v-show="isSidebarVisible" class="chats-list">
+        <!-- Лоадинг для списка чатов -->
+        <div v-if="loadingRooms" class="loading-rooms">
+          <div class="loading-spinner">
+            <div class="spinner-dot"></div>
+            <div class="spinner-dot"></div>
+            <div class="spinner-dot"></div>
+          </div>
+          <span>Загрузка чатов...</span>
+        </div>
+        
+        <div v-else-if="chatStore.rooms.length === 0" class="empty-rooms">
+          <div class="empty-icon">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <span>Нет чатов</span>
+          <p>Начните новый диалог</p>
+        </div>
+        
+        <div v-else>
+          <div
+            v-for="room in chatStore.rooms"
+            :key="room.id"
+            class="chat-item"
+            :class="{ 
+              active: activeRoom?.id === room.id,
+              unread: room.unread_count > 0
+            }"
+            @click="selectRoom(room)"
+          >
+            <div class="chat-item-content">
+              <div class="avatar-container">
+                <el-avatar 
+                  :size="mobile ? 40 : 52" 
+                  :src="getRoomAvatar(room)" 
+                  class="chat-avatar"
+                  :class="{ 'online-indicator': getRoomParticipant(room)?.is_online }"
+                />
+                <div v-if="room.unread_count > 0" class="unread-indicator">
+                  {{ room.unread_count > 99 ? '99+' : room.unread_count }}
                 </div>
-                <div class="chat-preview">
-                  <div class="last-message-container">
-                    <span class="last-message">{{ getLastMessage(room) }}</span>
-                    <div class="message-status">
-                      <i v-if="room.unread_count > 0" 
-                         class="icon-unread"></i>
+              </div>
+              
+              <div class="chat-details">
+                <div class="chat-meta">
+                  <div class="chat-name-time">
+                    <span class="chat-name">{{ getRoomName(room) }}</span>
+                    <span class="chat-time">{{ formatTime(room.last_message?.createdAt) }}</span>
+                  </div>
+                  <div class="chat-preview">
+                    <div class="last-message-container">
+                      <span class="last-message">{{ getLastMessage(room) }}</span>
+                      <div class="message-status">
+                        <i v-if="room.unread_count > 0" 
+                           class="icon-unread"></i>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
+            
+            <div class="active-indicator"></div>
           </div>
-          
-          <div class="active-indicator"></div>
         </div>
       </div>
     </div>
 
     <!-- Основная область чата -->
-    <div class="chat-main" v-if="activeRoom">
+    <div class="chat-main" :class="{ 'main-expanded': !isSidebarVisible }" v-if="activeRoom">
       <div class="chat-header">
         <div class="header-info">
-          <el-avatar :size="44" :src="getRoomAvatar(activeRoom)" />
+          <!-- Кнопка показа сайдбара когда он скрыт -->
+          <button v-if="!isSidebarVisible" @click="()=>toggleSidebar(true)" class="show-sidebar-btn">
+            <svg class="toggle-icon" viewBox="0 0 24 24" fill="none">
+              <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <el-avatar :size="mobile ? 36 : 44" :src="getRoomAvatar(activeRoom)" />
           <div class="room-info">
             <h4>{{ getRoomName(activeRoom) }}</h4>
             <p v-if="activeRoom.type === 'private'" class="online-status">
@@ -150,12 +183,22 @@
       <!-- Область сообщений -->
       <div class="messages-container" ref="messagesContainer">
         <div v-if="loadingMessages" class="loading-messages">
-          <div class="loading-spinner">
+          <div class="loading-spinner large">
             <div class="spinner-dot"></div>
             <div class="spinner-dot"></div>
             <div class="spinner-dot"></div>
           </div>
-          Загрузка сообщений...
+          <span>Загрузка сообщений...</span>
+        </div>
+        
+        <div v-else-if="chatStore.messages.length === 0" class="empty-messages">
+          <div class="empty-icon">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M21 15C21 15.5304 20.7893 16.0391 20.4142 16.4142C20.0391 16.7893 19.5304 17 19 17H7L3 21V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V15Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <span>Нет сообщений</span>
+          <p>Начните диалог первым сообщением</p>
         </div>
         
         <div v-else class="messages-list">
@@ -166,7 +209,7 @@
             :class="{ own: message.user_id === authStore.user?.id }"
           >
             <div class="message-avatar">
-              <el-avatar :size="36" :src="message.user?.avatar_url" />
+              <el-avatar :size="mobile ? 32 : 36" :src="message.user?.avatar_url" />
             </div>
             <div class="message-content">
               <div class="message-header">
@@ -205,6 +248,7 @@
             @keydown="handleTyping"
             @keyup.enter="sendMessage"
             class="message-input"
+            :disabled="sendingMessage"
           />
           <button 
             @click="sendMessage" 
@@ -306,11 +350,25 @@
         </div>
       </div>
     </el-dialog>
+
+    <!-- Глобальный лоадинг для операций -->
+    <div v-if="deletingRoom || blockingUser || unblockingUser" class="global-loading-overlay">
+      <div class="global-loading-content">
+        <div class="global-spinner">
+          <div class="spinner-ring"></div>
+        </div>
+        <span class="global-loading-text">
+          {{ deletingRoom && 'Удаление чата...' }}
+          {{ blockingUser && 'Блокировка пользователя...' }}
+          {{ unblockingUser && 'Разблокировка пользователя...' }}
+        </span>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
-import { ref, onMounted, onUnmounted, nextTick } from 'vue'
+import { ref, onMounted, onUnmounted, nextTick, computed } from 'vue'
 import { useAuthStore } from '../stores/auth'
 import { useChatStore } from '../stores/chat'
 import { useUsersStore } from '../stores/users'
@@ -334,6 +392,7 @@ export default {
     const newMessage = ref('')
     const sendingMessage = ref(false)
     const loadingMessages = ref(false)
+    const loadingRooms = ref(false) // Добавлено состояние загрузки комнат
     const messagesContainer = ref(null)
     const typingUsers = ref([])
     const typingTimeout = ref(null)
@@ -342,6 +401,17 @@ export default {
     const deletingRoom = ref(false)
     const blockingUser = ref(false)
     const unblockingUser = ref(false)
+
+    // Добавляем состояние для видимости сайдбара
+    const isSidebarVisible = ref(true)
+
+    // Определяем мобильное устройство
+    const mobile = computed(() => window.innerWidth < 768)
+
+    // Функция переключения видимости сайдбара
+    const toggleSidebar = (value) => {
+      isSidebarVisible.value = value
+    }
 
     const getRoomAvatar = (room) => {
       if (room?.type === 'team') {
@@ -413,6 +483,10 @@ export default {
         chatStore.setActiveRoom(room.id)
         webSocketService.joinChat(room.id)
         scrollToBottom()
+        // На мобильных автоматически скрываем сайдбар при выборе чата
+        if (mobile.value) {
+          toggleSidebar(false)
+        }
       } catch (error) {
         ElMessage.error('Ошибка загрузки сообщений')
       } finally {
@@ -576,6 +650,7 @@ export default {
 
     onMounted(async () => {
       try {
+        loadingRooms.value = true
         await chatStore.getRooms()
         setupWebSocketHandlers()
 
@@ -585,6 +660,8 @@ export default {
         }
       } catch (error) {
         ElMessage.error('Ошибка загрузки чатов')
+      } finally {
+        loadingRooms.value = false
       }
     })
 
@@ -607,11 +684,15 @@ export default {
       newMessage,
       sendingMessage,
       loadingMessages,
+      loadingRooms, // Добавлено в возвращаемые значения
       messagesContainer,
       typingUsers,
       deletingRoom,
       blockingUser,
       unblockingUser,
+      isSidebarVisible,
+      mobile,
+      toggleSidebar,
       getRoomAvatar,
       getRoomName,
       getRoomParticipant,
@@ -628,7 +709,168 @@ export default {
 </script>
 
 <style scoped>
-/* Все существующие стили остаются без изменений */
+/* Добавляем стили для лоадинга */
+
+/* Лоадинг для списка чатов */
+.loading-rooms {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.loading-rooms .loading-spinner {
+  display: flex;
+  flex-direction: row;
+  height: auto;
+  margin-bottom: 16px;
+}
+
+/* Лоадинг для сообщений */
+.loading-messages {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.loading-messages .loading-spinner.large {
+  display: flex;
+  flex-direction: row;
+  margin-bottom: 20px;
+}
+
+.loading-messages .loading-spinner.large .spinner-dot {
+  width: 10px;
+  height: 10px;
+}
+
+/* Пустые состояния */
+.empty-rooms,
+.empty-messages {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.empty-icon {
+  width: 60px;
+  height: 60px;
+  margin-bottom: 16px;
+  color: var(--border-color);
+}
+
+.empty-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.empty-rooms span,
+.empty-messages span {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.empty-rooms p,
+.empty-messages p {
+  font-size: 0.9rem;
+  margin: 0;
+  opacity: 0.8;
+}
+
+/* Глобальный лоадинг для операций */
+.global-loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.global-loading-content {
+  background: var(--bg-secondary);
+  border-radius: var(--border-radius-lg);
+  padding: 32px;
+  box-shadow: var(--shadow-xl);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  min-width: 200px;
+}
+
+.global-spinner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.spinner-ring {
+  width: 40px;
+  height: 40px;
+  border: 4px solid var(--border-color);
+  border-top: 4px solid var(--primary-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+.global-loading-text {
+  font-weight: 600;
+  color: var(--text-primary);
+  text-align: center;
+}
+
+/* Анимация спиннера */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Улучшенный спиннер для точек */
+.loading-spinner {
+  display: flex;
+  gap: 4px;
+}
+
+.spinner-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--primary-color);
+  animation: bounce 1.4s infinite ease-in-out both;
+}
+
+.spinner-dot:nth-child(1) { animation-delay: -0.32s; }
+.spinner-dot:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes bounce {
+  0%, 80%, 100% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Остальные существующие стили остаются без изменений */
 .chat-container {
   display: flex;
   height: calc(100vh - 140px);
@@ -636,6 +878,8 @@ export default {
   border-radius: var(--border-radius-lg);
   box-shadow: var(--shadow-md);
   overflow: hidden;
+  position: relative;
+  transition: all var(--transition-normal);
 }
 
 /* Сайдбар */
@@ -645,6 +889,16 @@ export default {
   border-right: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
+  transition: all var(--transition-normal);
+  position: relative;
+  z-index: 10;
+}
+
+.chat-sidebar.sidebar-collapsed {
+  width: 0;
+  min-width: 0;
+  border-right: none;
+  transform: translateX(-100%);
 }
 
 .sidebar-header {
@@ -668,6 +922,34 @@ export default {
   background-clip: text;
   font-weight: 700;
   font-size: 1.5rem;
+}
+
+/* Кнопка переключения сайдбара */
+.toggle-sidebar-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+  margin-left: auto;
+}
+
+.toggle-sidebar-btn:hover {
+  background: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+  transform: scale(1.05);
+}
+
+.toggle-icon {
+  width: 20px;
+  height: 20px;
 }
 
 .search-container {
@@ -917,6 +1199,11 @@ export default {
   display: flex;
   flex-direction: column;
   background: var(--bg-secondary);
+  transition: all var(--transition-normal);
+}
+
+.chat-main.main-expanded {
+  margin-left: 0;
 }
 
 .chat-header {
@@ -933,6 +1220,29 @@ export default {
   display: flex;
   align-items: center;
   gap: 16px;
+}
+
+/* Кнопка показа сайдбара в заголовке */
+.show-sidebar-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+  margin-right: 12px;
+}
+
+.show-sidebar-btn:hover {
+  background: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+  transform: scale(1.05);
 }
 
 .room-info h4 {
@@ -1021,44 +1331,6 @@ export default {
     radial-gradient(circle at 25px 25px, rgba(120, 119, 198, 0.03) 3%, transparent 0%), 
     radial-gradient(circle at 75px 75px, rgba(120, 119, 198, 0.03) 3%, transparent 0%);
   background-size: 100px 100px;
-}
-
-.loading-messages {
-  text-align: center;
-  color: var(--text-muted);
-  padding: 40px;
-  font-size: 0.95rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-}
-
-.loading-spinner {
-  display: flex;
-  gap: 4px;
-}
-
-.spinner-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--primary-color);
-  animation: bounce 1.4s infinite ease-in-out both;
-}
-
-.spinner-dot:nth-child(1) { animation-delay: -0.32s; }
-.spinner-dot:nth-child(2) { animation-delay: -0.16s; }
-
-@keyframes bounce {
-  0%, 80%, 100% {
-    transform: scale(0.8);
-    opacity: 0.5;
-  }
-  40% {
-    transform: scale(1);
-    opacity: 1;
-  }
 }
 
 .messages-list {
@@ -1295,11 +1567,6 @@ export default {
   animation: spin 1s linear infinite;
 }
 
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
 .send-button.loading {
   background: var(--bg-primary);
   border: 1px solid var(--border-color);
@@ -1346,6 +1613,249 @@ export default {
   line-height: 1.5;
 }
 
+/* Анимации */
+.chat-sidebar {
+  animation: slideInLeft 0.3s ease-out;
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .chat-container {
+    height: calc(100vh - 120px);
+  }
+  
+  .chat-sidebar {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    z-index: 100;
+    box-shadow: var(--shadow-xl);
+    width: 100%;
+    max-width: 380px;
+  }
+  
+  .chat-sidebar:not(.sidebar-collapsed) {
+    transform: translateX(0);
+  }
+  
+  .chat-sidebar.sidebar-collapsed {
+    transform: translateX(-100%);
+  }
+  
+  .chat-main.main-expanded {
+    width: 100%;
+  }
+  
+  /* Затемнение фона когда сайдбар открыт на мобильных */
+  .chat-sidebar:not(.sidebar-collapsed) + .chat-main::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 5;
+  }
+}
+
+/* Мобильная адаптация для очень маленьких экранов (< 500px) */
+@media (max-width: 500px) {
+  .chat-container {
+    height: calc(100vh - 100px);
+    border-radius: var(--border-radius);
+  }
+  
+  .chat-sidebar {
+    max-width: 100%;
+  }
+  
+  .header-content {
+    padding: 16px 20px 12px 20px;
+  }
+  
+  .header-content h3 {
+    font-size: 1.3rem;
+  }
+  
+  .search-container {
+    padding: 0 20px 16px 20px;
+  }
+  
+  .chats-list {
+    padding: 6px 12px;
+  }
+  
+  .chat-item-content {
+    padding: 12px;
+    gap: 12px;
+  }
+  
+  .chat-name {
+    font-size: 0.9rem;
+  }
+  
+  .last-message {
+    font-size: 0.8rem;
+  }
+  
+  .chat-time {
+    font-size: 0.7rem;
+  }
+  
+  /* Основная область чата */
+  .chat-header {
+    padding: 12px 16px;
+  }
+  
+  .header-info {
+    gap: 12px;
+  }
+  
+  .room-info h4 {
+    font-size: 1.1rem;
+  }
+  
+  .online-status {
+    font-size: 0.8rem;
+  }
+  
+  .messages-container {
+    padding: 16px;
+  }
+  
+  .message {
+    max-width: 85%;
+    gap: 8px;
+  }
+  
+  .message-bubble {
+    padding: 10px 14px;
+    margin-bottom: 8px;
+  }
+  
+  .message-text {
+    margin-right: 35px;
+    font-size: 0.9rem;
+  }
+  
+  .message-time {
+    font-size: 0.65rem;
+    bottom: 4px;
+    right: 10px;
+  }
+  
+  .chat-input {
+    padding: 16px;
+  }
+  
+  .input-container {
+    gap: 8px;
+  }
+  
+  .message-input :deep(.el-textarea__inner) {
+    padding: 12px 16px;
+    font-size: 0.85rem;
+  }
+  
+  .send-button {
+    width: 44px;
+    height: 44px;
+  }
+  
+  .send-icon {
+    width: 18px;
+    height: 18px;
+  }
+  
+  .toggle-sidebar-btn,
+  .show-sidebar-btn {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .menu-btn {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .info-btn {
+    padding: 6px;
+  }
+  
+  /* Адаптация лоадинга для мобильных */
+  .loading-rooms,
+  .empty-rooms {
+    padding: 30px 16px;
+  }
+  
+  .loading-messages,
+  .empty-messages {
+    padding: 40px 16px;
+  }
+  
+  .global-loading-content {
+    padding: 24px;
+    min-width: 180px;
+  }
+}
+
+/* Еще более мелкие экраны (< 360px) */
+@media (max-width: 360px) {
+  .chat-container {
+    height: calc(100vh - 80px);
+  }
+  
+  .header-content {
+    padding: 12px 16px 10px 16px;
+  }
+  
+  .search-container {
+    padding: 0 16px 12px 16px;
+  }
+  
+  .chats-list {
+    padding: 4px 8px;
+  }
+  
+  .chat-item-content {
+    padding: 10px;
+    gap: 10px;
+  }
+  
+  .chat-header {
+    padding: 10px 12px;
+  }
+  
+  .messages-container {
+    padding: 12px;
+  }
+  
+  .message {
+    max-width: 90%;
+  }
+  
+  .message-bubble {
+    padding: 8px 12px;
+  }
+  
+  .chat-input {
+    padding: 12px;
+  }
+}
+
 /* Кастомный скроллбар */
 .chats-list::-webkit-scrollbar,
 .messages-container::-webkit-scrollbar {
@@ -1366,21 +1876,6 @@ export default {
 .chats-list::-webkit-scrollbar-thumb:hover,
 .messages-container::-webkit-scrollbar-thumb:hover {
   background: var(--text-muted);
-}
-
-/* Адаптивность */
-@media (max-width: 768px) {
-  .chat-sidebar {
-    width: 100%;
-  }
-  
-  .chat-item-content {
-    padding: 12px;
-  }
-  
-  .message {
-    max-width: 85%;
-  }
 }
 
 /* Анимация для отправки сообщения */
@@ -1612,5 +2107,46 @@ export default {
 .dropdown-icon {
   width: 16px;
   height: 16px;
+}
+
+/* Адаптивность диалога для мобильных */
+@media (max-width: 500px) {
+  .room-info-dialog .el-dialog {
+    width: 95% !important;
+    margin: 10px auto;
+  }
+  
+  .room-header {
+    padding: 24px 16px;
+  }
+  
+  .room-avatar {
+    width: 60px !important;
+    height: 60px !important;
+  }
+  
+  .room-header h4 {
+    font-size: 1.2rem;
+  }
+  
+  .team-section,
+  .private-section {
+    padding: 16px;
+  }
+  
+  .participant-card {
+    flex-direction: column;
+    text-align: center;
+    gap: 16px;
+    padding: 16px;
+  }
+  
+  .participant-stats {
+    gap: 6px;
+  }
+  
+  .stat {
+    justify-content: center;
+  }
 }
 </style>

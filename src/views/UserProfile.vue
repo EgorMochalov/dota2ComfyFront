@@ -7,96 +7,128 @@
         <div class="user-main-card">
           <div class="user-avatar-section">
             <div class="avatar-container">
-              <el-avatar :size="120" :src="user?.avatar_url" fit="cover" />
-              <div class="online-status" :class="{ online: isUserOnline(user?.last_online) }">
-                <div class="status-dot"></div>
+              <template v-if="!loading">
+                <el-avatar :size="120" :src="user?.avatar_url" fit="cover" />
+                <div class="online-status" :class="{ online: isUserOnline(user?.last_online) }">
+                  <div class="status-dot"></div>
+                </div>
+              </template>
+              <div v-else class="avatar-skeleton">
+                <div class="skeleton-circle"></div>
               </div>
             </div>
           </div>
           
           <div class="user-basic-info">
-            <div class="user-header">
-              <h1 class="username">{{ user?.username }}</h1>
-              <div class="user-badges">
-                <el-tag 
-                  v-if="user?.team_id" 
-                  type="success" 
-                  effect="light"
-                  class="team-badge"
-                >
-                  <el-icon><Star /></el-icon>
-                  В команде
-                </el-tag>
-                <el-tag 
-                  :type="user?.is_searching ? 'primary' : 'info'" 
-                  effect="light"
-                  class="status-badge"
-                >
-                  {{ user?.is_searching ? 'В поиске' : 'Не в поиске' }}
-                </el-tag>
-              </div>
-            </div>
-            
-            <div class="user-stats">
-              <div class="stat-item">
-                <div class="stat-value">{{ user?.mmr_rating || 'Не указан' }}</div>
-                <div class="stat-label">MMR рейтинг</div>
-              </div>
-              <div class="stat-item">
-                <div class="stat-value">{{ getRegionLabel(user?.region) }}</div>
-                <div class="stat-label">Регион</div>
-              </div>
-              <div class="stat-item">
-                <div class="stat-value">
+            <template v-if="!loading">
+              <div class="user-header">
+                <h1 class="username">{{ user?.username }}</h1>
+                <div class="user-badges">
                   <el-tag 
-                    v-if="isUserOnline(user?.last_online)" 
+                    v-if="user?.team_id" 
                     type="success" 
-                    effect="dark"
+                    effect="light"
+                    class="team-badge"
                   >
-                    Online
+                    <el-icon><Star /></el-icon>
+                    В команде
                   </el-tag>
-                  <el-tag v-else type="info" effect="dark">
-                    Offline
+                  <el-tag 
+                    :type="user?.is_searching ? 'primary' : 'info'" 
+                    effect="light"
+                    class="status-badge"
+                  >
+                    {{ user?.is_searching ? 'В поиске' : 'Не в поиске' }}
                   </el-tag>
                 </div>
-                <div class="stat-label">Статус</div>
               </div>
-            </div>
+              
+              <div class="user-stats">
+                <div class="stat-item">
+                  <div class="stat-value">{{ user?.mmr_rating || 'Не указан' }}</div>
+                  <div class="stat-label">MMR рейтинг</div>
+                </div>
+                <div class="stat-item">
+                  <div class="stat-value">{{ getRegionLabel(user?.region) }}</div>
+                  <div class="stat-label">Регион</div>
+                </div>
+                <div class="stat-item">
+                  <div class="stat-value">
+                    <el-tag 
+                      v-if="isUserOnline(user?.last_online)" 
+                      type="success" 
+                      effect="dark"
+                    >
+                      Online
+                    </el-tag>
+                    <el-tag v-else type="info" effect="dark">
+                      Offline
+                    </el-tag>
+                  </div>
+                  <div class="stat-label">Статус</div>
+                </div>
+              </div>
+            </template>
+            <template v-else>
+              <div class="header-skeleton">
+                <div class="skeleton-line skeleton-title"></div>
+                <div class="badges-skeleton">
+                  <div class="skeleton-badge" v-for="i in 2" :key="i"></div>
+                </div>
+              </div>
+              <div class="stats-skeleton">
+                <div class="skeleton-stats">
+                  <div class="skeleton-stat" v-for="i in 3" :key="i">
+                    <div class="skeleton-line skeleton-value"></div>
+                    <div class="skeleton-line skeleton-label"></div>
+                  </div>
+                </div>
+              </div>
+            </template>
           </div>
 
           <div class="user-actions">
-            <el-button 
-              type="primary" 
-              size="large"
-              @click="startChat(user?.id)"
-              :disabled="!user || user.id === authStore.user?.id"
-              class="action-button chat-button"
-            >
-              Написать
-              <el-icon><ChatDotRound /></el-icon>
-            </el-button>
-            
-            <el-button 
-              v-if="authStore.user?.team_id && !user?.team_id"
-              type="success"
-              size="large"
-              @click="inviteToTeam"
-              class="action-button invite-button"
-            >
-              Пригласить в команду
-              <el-icon><User /></el-icon>
-            </el-button>
-            
-            <el-button 
-              type="danger"
-              size="large"
-              @click="blockUser"
-              :disabled="!user || user.id === authStore.user?.id"
-              class="action-button block-button"
-            >
-              Заблокировать
-              <el-icon><Close /></el-icon>
-            </el-button>
+            <template v-if="!loading">
+              <el-button 
+                type="primary" 
+                size="large"
+                @click="startChat(user?.id)"
+                :disabled="!user || user.id === authStore.user?.id"
+                class="action-button chat-button"
+              >
+                Написать
+                <el-icon><ChatDotRound /></el-icon>
+              </el-button>
+              
+              <el-button 
+                v-if="authStore.user?.team_id && !user?.team_id"
+                type="success"
+                size="large"
+                @click="inviteToTeam"
+                class="action-button invite-button"
+              >
+                Пригласить в команду
+                <el-icon><User /></el-icon>
+              </el-button>
+              
+              <el-button 
+                type="danger"
+                size="large"
+                @click="blockUser"
+                :disabled="!user || user.id === authStore.user?.id"
+                class="action-button block-button"
+              >
+                Заблокировать
+                <el-icon><Close /></el-icon>
+              </el-button>
+            </template>
+            <template v-else>
+              <div class="actions-skeleton">
+                <div class="skeleton-button skeleton-primary"></div>
+                <div class="skeleton-button skeleton-success"></div>
+                <div class="skeleton-button skeleton-danger"></div>
+              </div>
+            </template>
           </div>
         </div>
       </div>
@@ -115,7 +147,10 @@
                 <el-icon><InfoFilled /></el-icon>
               </div>
             </template>
-            <div class="about-content">
+            <div v-if="loading" class="about-skeleton">
+              <div class="skeleton-line skeleton-text" v-for="i in 3" :key="i"></div>
+            </div>
+            <div v-else class="about-content">
               <p>{{ user.about_me }}</p>
             </div>
           </el-card>
@@ -128,7 +163,15 @@
                 <el-icon><VideoPlay /></el-icon>
               </div>
             </template>
-            <div class="preferences-content">
+            <div v-if="loading" class="preferences-skeleton">
+              <div class="section-skeleton" v-for="i in 3" :key="i">
+                <div class="skeleton-line skeleton-label-small"></div>
+                <div class="tags-skeleton">
+                  <div class="skeleton-tag" v-for="j in 4" :key="j"></div>
+                </div>
+              </div>
+            </div>
+            <div v-else class="preferences-content">
               <!-- Режимы игры -->
               <div class="preference-section" v-if="user?.game_modes?.length">
                 <h4 class="section-title">Режимы игры</h4>
@@ -147,7 +190,7 @@
               <!-- Роли -->
               <div class="preference-section" v-if="user?.preferred_roles?.length">
                 <h4 class="section-title">Предпочитаемые роли</h4>
-                <div class="">
+                <div class="tags-container">
                   <el-tag
                     v-for="role in user.preferred_roles"
                     :key="role"
@@ -190,7 +233,16 @@
                 <el-icon><DataAnalysis /></el-icon>
               </div>
             </template>
-            <div class="stats-content">
+            <div v-if="loading" class="stats-skeleton-grid">
+              <div class="stat-card-skeleton" v-for="i in 3" :key="i">
+                <div class="skeleton-icon"></div>
+                <div class="stat-info-skeleton">
+                  <div class="skeleton-line skeleton-stat-value"></div>
+                  <div class="skeleton-line skeleton-stat-label"></div>
+                </div>
+              </div>
+            </div>
+            <div v-else class="stats-content">
               <div class="stats-grid">
                 <div class="stat-card">
                   <div class="stat-icon primary">
@@ -226,6 +278,7 @@
 
         <!-- Правая колонка - Дополнительная информация -->
         <div class="right-column">
+          <!-- Команда -->
           <el-card v-if="user?.team" class="info-card" shadow="hover">
             <template #header>
               <div class="card-header">
@@ -233,7 +286,15 @@
                 <el-icon><Star /></el-icon>
               </div>
             </template>
-            <div class="team-info" @click="$router.push(`/teams/${user.team.id}`)">
+            <div v-if="loading" class="team-skeleton">
+              <div class="skeleton-circle skeleton-avatar"></div>
+              <div class="team-details-skeleton">
+                <div class="skeleton-line skeleton-team-name"></div>
+                <div class="skeleton-line skeleton-team-members"></div>
+                <div class="skeleton-badge skeleton-captain"></div>
+              </div>
+            </div>
+            <div v-else class="team-info" @click="$router.push(`/teams/${user.team.id}`)">
               <el-avatar :size="60" :src="user.team.avatar_url" />
               <div class="team-details">
                 <h4>{{ user.team.name }}</h4>
@@ -245,7 +306,8 @@
               <el-icon class="team-arrow"><ArrowRight /></el-icon>
             </div>
           </el-card>
-          <!-- Карточка активности -->
+
+          <!-- Активность -->
           <el-card class="info-card" shadow="hover">
             <template #header>
               <div class="card-header">
@@ -253,7 +315,16 @@
                 <el-icon><DataLine /></el-icon>
               </div>
             </template>
-            <div class="activity-content">
+            <div v-if="loading" class="activity-skeleton">
+              <div class="activity-item-skeleton" v-for="i in 2" :key="i">
+                <div class="skeleton-dot"></div>
+                <div class="activity-info-skeleton">
+                  <div class="skeleton-line skeleton-activity-text"></div>
+                  <div class="skeleton-line skeleton-activity-time"></div>
+                </div>
+              </div>
+            </div>
+            <div v-else class="activity-content">
               <div class="activity-item">
                 <div class="activity-dot recent"></div>
                 <div class="activity-info">
@@ -270,6 +341,7 @@
               </div>
             </div>
           </el-card>
+
           <!-- Совместимость -->
           <el-card class="info-card compatibility-card" shadow="hover">
             <template #header>
@@ -278,7 +350,17 @@
                 <el-icon><Connection /></el-icon>
               </div>
             </template>
-            <div class="compatibility-content">
+            <div v-if="loading" class="compatibility-skeleton">
+              <div class="skeleton-circle skeleton-score"></div>
+              <div class="factors-skeleton">
+                <div class="skeleton-factor" v-for="i in 3" :key="i">
+                  <div class="skeleton-line skeleton-factor-label"></div>
+                  <div class="skeleton-bar"></div>
+                  <div class="skeleton-line skeleton-factor-value"></div>
+                </div>
+              </div>
+            </div>
+            <div v-else class="compatibility-content">
               <div class="compatibility-score">
                 <div class="score-circle">
                   <div class="score-value">82%</div>
@@ -358,13 +440,10 @@ import {
   ChatDotRound,
   User,
   Close,
-  Message,
   VideoPlay,
   DataLine,
   InfoFilled,
   DataAnalysis,
-  Lightning,
-  Search,
   Connection,
   ArrowRight,
   Clock,
@@ -378,13 +457,10 @@ export default {
     ChatDotRound,
     User,
     Close,
-    Message,
     VideoPlay,
     DataLine,
     InfoFilled,
     DataAnalysis,
-    Lightning,
-    Search,
     Connection,
     ArrowRight,
     Clock,
@@ -422,15 +498,15 @@ export default {
       return role ? role.label : roleValue
     }
 
-    const getRoleClass = (roleValue) => {
-      const classes = {
-        'carry': 'role-carry',
-        'mid': 'role-mid',
-        'offlane': 'role-offlane',
-        'support': 'role-support',
-        'hard_support': 'role-hard-support'
+    const getRoleType = (roleValue) => {
+      const types = {
+        'carry': 'danger',
+        'mid': 'primary',
+        'offlane': 'warning',
+        'support': 'success',
+        'hard_support': 'info'
       }
-      return classes[roleValue] || 'role-default'
+      return types[roleValue] || 'info'
     }
 
     const isUserOnline = (lastOnline) => {
@@ -463,6 +539,7 @@ export default {
 
     const loadUser = async () => {
       const userId = route.params.id
+      loading.value = true
       try {
         user.value = await usersStore.getProfile(userId)
       } catch (error) {
@@ -536,25 +613,6 @@ export default {
       }
     }
 
-    const getRoleType = (roleValue) => {
-      const types = {
-        'carry': 'danger',
-        'mid': 'primary',
-        'offlane': 'warning',
-        'support': 'success',
-        'hard_support': 'info'
-      }
-      return types[roleValue] || 'info'
-    }
-
-    const viewSteamProfile = () => {
-      if (user.value?.steam_id) {
-        window.open(`https://steamcommunity.com/profiles/${user.value.steam_id}`, '_blank')
-      } else {
-        ElMessage.warning('Steam ID не указан')
-      }
-    }
-
     onMounted(() => {
       loadUser()
     })
@@ -569,15 +627,13 @@ export default {
       getRegionLabel,
       getGameModeLabel,
       getRoleLabel,
-      getRoleClass,
+      getRoleType,
       isUserOnline,
       getLastOnlineText,
       startChat,
       inviteToTeam,
       sendInvitation,
-      blockUser,
-      viewSteamProfile,
-      getRoleType
+      blockUser
     }
   }
 }
@@ -587,13 +643,14 @@ export default {
 .user-profile-page {
   min-height: 100vh;
   background: var(--bg-primary);
+  overflow-x: hidden;
 }
 
 /* Hero секция */
 .profile-hero {
   position: relative;
   background: var(--success-gradient);
-  padding: 60px 0 80px;
+  padding: 40px 0 60px;
   overflow: hidden;
 }
 
@@ -617,16 +674,17 @@ export default {
 .user-main-card {
   display: flex;
   align-items: center;
-  gap: 40px;
+  gap: 30px;
   color: white;
 }
 
 .avatar-container {
   position: relative;
   border-radius: 50%;
-  padding: 8px;
+  padding: 6px;
   background: rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(10px);
+  flex-shrink: 0;
 }
 
 .online-status {
@@ -649,8 +707,13 @@ export default {
   background: var(--success-gradient);
 }
 
+.avatar-skeleton {
+  padding: 6px;
+}
+
 .user-basic-info {
   flex: 1;
+  min-width: 0;
 }
 
 .user-header {
@@ -658,18 +721,21 @@ export default {
   align-items: center;
   gap: 16px;
   margin-bottom: 20px;
+  flex-wrap: wrap;
 }
 
 .username {
-  font-size: 2.5rem;
+  font-size: 2rem;
   font-weight: 700;
   margin: 0;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  word-wrap: break-word;
 }
 
 .user-badges {
   display: flex;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .team-badge,
@@ -680,21 +746,24 @@ export default {
 
 .user-stats {
   display: flex;
-  gap: 40px;
+  gap: 30px;
+  flex-wrap: wrap;
 }
 
 .stat-item {
   text-align: center;
+  flex: 1;
+  min-width: 80px;
 }
 
 .stat-value {
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   font-weight: 600;
-  margin-bottom: 5px;
+  margin-bottom: 4px;
 }
 
 .stat-label {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   opacity: 0.9;
 }
 
@@ -703,6 +772,7 @@ export default {
   flex-direction: column;
   gap: 12px;
   min-width: 200px;
+  flex-shrink: 0;
 }
 
 .action-button {
@@ -710,6 +780,7 @@ export default {
   border-radius: var(--border-radius);
   font-weight: 500;
   padding: 12px 16px;
+  white-space: nowrap;
 }
 
 .chat-button {
@@ -724,12 +795,229 @@ export default {
   background: var(--danger-gradient);
 }
 
+/* Улучшенные скелетоны */
+.skeleton-circle {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: linear-gradient(90deg, rgba(255,255,255,0.1) 25%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0.1) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+}
+
+.skeleton-line {
+  background: linear-gradient(90deg, rgba(255,255,255,0.1) 25%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0.1) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+  border-radius: 4px;
+}
+
+.skeleton-title {
+  height: 40px;
+  width: 200px;
+  margin-bottom: 16px;
+}
+
+.skeleton-stats {
+  display: flex;
+  gap: 30px;
+  flex-wrap: wrap;
+}
+
+.skeleton-stat {
+  text-align: center;
+  flex: 1;
+  min-width: 80px;
+}
+
+.skeleton-value {
+  height: 24px;
+  width: 60px;
+  margin: 0 auto 6px;
+}
+
+.skeleton-label {
+  height: 16px;
+  width: 50px;
+  margin: 0 auto;
+}
+
+.skeleton-badge {
+  height: 28px;
+  width: 100px;
+  border-radius: 14px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.1) 25%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0.1) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+  margin-right: 8px;
+}
+
+.skeleton-button {
+  height: 44px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.1) 25%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0.1) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+}
+
+.skeleton-primary {
+  background: linear-gradient(90deg, rgba(102,126,234,0.2) 25%, rgba(102,126,234,0.3) 50%, rgba(102,126,234,0.2) 75%);
+}
+
+.skeleton-success {
+  background: linear-gradient(90deg, rgba(16,185,129,0.2) 25%, rgba(16,185,129,0.3) 50%, rgba(16,185,129,0.2) 75%);
+}
+
+.skeleton-danger {
+  background: linear-gradient(90deg, rgba(239,68,68,0.2) 25%, rgba(239,68,68,0.3) 50%, rgba(239,68,68,0.2) 75%);
+}
+
+.skeleton-text {
+  height: 16px;
+  margin-bottom: 8px;
+}
+
+.skeleton-text:last-child {
+  width: 80%;
+}
+
+.skeleton-label-small {
+  height: 16px;
+  width: 80px;
+  margin-bottom: 8px;
+}
+
+.skeleton-tag {
+  height: 24px;
+  width: 60px;
+  border-radius: 12px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.1) 25%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0.1) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+  margin-right: 6px;
+  margin-bottom: 6px;
+}
+
+.skeleton-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, rgba(255,255,255,0.1) 25%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0.1) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+}
+
+.skeleton-stat-value {
+  height: 20px;
+  width: 40px;
+  margin-bottom: 4px;
+}
+
+.skeleton-stat-label {
+  height: 14px;
+  width: 60px;
+}
+
+.skeleton-avatar {
+  width: 60px;
+  height: 60px;
+}
+
+.skeleton-team-name {
+  height: 20px;
+  width: 120px;
+  margin-bottom: 6px;
+}
+
+.skeleton-team-members {
+  height: 16px;
+  width: 80px;
+  margin-bottom: 6px;
+}
+
+.skeleton-captain {
+  height: 20px;
+  width: 60px;
+}
+
+.skeleton-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: linear-gradient(90deg, rgba(255,255,255,0.1) 25%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0.1) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+  flex-shrink: 0;
+}
+
+.skeleton-activity-text {
+  height: 16px;
+  width: 80px;
+  margin-bottom: 4px;
+}
+
+.skeleton-activity-time {
+  height: 14px;
+  width: 60px;
+}
+
+.skeleton-score {
+  width: 100px;
+  height: 100px;
+}
+
+.skeleton-factor-label {
+  height: 16px;
+  width: 60px;
+}
+
+.skeleton-bar {
+  height: 6px;
+  flex: 1;
+  background: linear-gradient(90deg, rgba(255,255,255,0.1) 25%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0.1) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+  border-radius: 3px;
+  margin: 0 8px;
+}
+
+.skeleton-factor-value {
+  height: 14px;
+  width: 30px;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.header-skeleton,
+.stats-skeleton {
+  margin-bottom: 20px;
+}
+
+.badges-skeleton {
+  display: flex;
+  gap: 8px;
+}
+
+.actions-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
 /* Основной контент */
 .profile-content {
   max-width: 1200px;
-  margin: -40px auto 0;
+  margin: -30px auto 0;
   padding: 0 20px 40px;
   position: relative;
+  box-sizing: border-box;
 }
 
 .content-grid {
@@ -747,6 +1035,7 @@ export default {
   box-shadow: var(--shadow-md);
   transition: all var(--transition-normal);
   margin-bottom: 24px;
+  overflow: hidden;
 }
 
 .info-card:hover {
@@ -758,14 +1047,16 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 !important;
+  padding: 20px 24px !important;
   border: none !important;
+  background: var(--bg-secondary);
 }
 
 .card-header h3 {
   margin: 0;
   color: var(--text-primary);
   font-weight: 600;
+  font-size: 1.2rem;
 }
 
 .card-header .el-icon {
@@ -773,106 +1064,114 @@ export default {
   font-size: 1.2rem;
 }
 
-/* Левая колонка */
-.team-info {
+/* Скелетоны */
+.about-skeleton {
+  padding: 24px;
+}
+
+.preferences-skeleton {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.section-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tags-skeleton {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.stats-skeleton-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 16px;
+  padding: 24px;
+}
+
+.stat-card-skeleton {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px;
-  border-radius: var(--border-radius);
+  padding: 16px;
   background: var(--bg-primary);
-  cursor: pointer;
-  transition: all var(--transition-fast);
+  border-radius: var(--border-radius);
 }
 
-.team-info:hover {
-  background: var(--primary-color);
-  color: white;
-}
-
-.team-info:hover .team-arrow {
-  color: white;
-}
-
-.team-details {
+.stat-info-skeleton {
   flex: 1;
-}
-
-.team-details h4 {
-  margin: 0 0 4px 0;
-  font-size: 1rem;
-}
-
-.team-details p {
-  margin: 0 0 4px 0;
-  font-size: 0.8rem;
-  opacity: 0.7;
-}
-
-.team-arrow {
-  margin-left: auto;
-  color: var(--text-muted);
-}
-
-.contact-actions {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 4px;
 }
 
-.contact-button {
-  justify-content: flex-start;
-  padding: 12px 16px;
-  border-radius: var(--border-radius);
-  font-weight: 500;
+.team-skeleton {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
 }
 
-.activity-content {
+.team-details-skeleton {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.activity-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 24px;
+}
+
+.activity-item-skeleton {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.activity-info-skeleton {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.compatibility-skeleton {
+  text-align: center;
+  padding: 24px;
+}
+
+.factors-skeleton {
+  margin-top: 24px;
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
-.activity-item {
+.skeleton-factor {
   display: flex;
   align-items: center;
-  gap: 12px;
-}
-
-.activity-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.activity-dot.recent {
-  background: var(--success-gradient);
-}
-
-.activity-dot.active {
-  background: var(--warning-gradient);
-}
-
-.activity-info {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  flex: 1;
-}
-
-.activity-time {
-  font-size: 0.8rem;
-  color: var(--text-muted);
+  gap: 8px;
 }
 
 /* Центральная колонка */
 .about-card .about-content {
   line-height: 1.6;
   color: var(--text-secondary);
+  padding: 8px 24px 24px;
 }
 
 .preferences-content {
+  padding: 8px 24px 24px;
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -902,70 +1201,6 @@ export default {
   font-weight: 500;
 }
 
-.roles-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 12px;
-}
-
-.role-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  padding: 16px;
-  border-radius: var(--border-radius);
-  background: var(--bg-primary);
-  transition: all var(--transition-fast);
-  cursor: pointer;
-}
-
-.role-card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-sm);
-}
-
-.role-carry {
-  border-left: 4px solid #e74c3c;
-}
-
-.role-mid {
-  border-left: 4px solid #3498db;
-}
-
-.role-offlane {
-  border-left: 4px solid #f39c12;
-}
-
-.role-support {
-  border-left: 4px solid #27ae60;
-}
-
-.role-hard-support {
-  border-left: 4px solid #9b59b6;
-}
-
-.role-default {
-  border-left: 4px solid var(--border-color);
-}
-
-.role-icon {
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--primary-gradient);
-  border-radius: 50%;
-  color: white;
-}
-
-.role-name {
-  font-size: 0.9rem;
-  font-weight: 500;
-  text-align: center;
-}
-
 .empty-state {
   text-align: center;
   padding: 40px 20px;
@@ -981,10 +1216,11 @@ export default {
 .empty-state p {
   margin: 0;
   font-size: 0.9rem;
+  line-height: 1.4;
 }
 
 .stats-content {
-  padding: 8px 0;
+  padding: 8px 24px 24px;
 }
 
 .stats-grid {
@@ -1042,26 +1278,95 @@ export default {
 }
 
 /* Правая колонка */
-.actions-content {
+.team-info {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.action-button {
-  justify-content: flex-start;
-  padding: 12px 16px;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
   border-radius: var(--border-radius);
-  font-weight: 500;
+  background: var(--bg-primary);
+  cursor: pointer;
   transition: all var(--transition-fast);
 }
 
-.action-button:hover {
-  transform: translateX(4px);
+.team-info:hover {
+  background: var(--primary-color);
+  color: white;
+}
+
+.team-info:hover .team-arrow {
+  color: white;
+}
+
+.team-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.team-details h4 {
+  margin: 0 0 4px 0;
+  font-size: 1rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.team-details p {
+  margin: 0 0 4px 0;
+  font-size: 0.85rem;
+  opacity: 0.7;
+}
+
+.team-arrow {
+  margin-left: auto;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.activity-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 8px 24px 24px;
+}
+
+.activity-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.activity-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.activity-dot.recent {
+  background: var(--success-gradient);
+}
+
+.activity-dot.active {
+  background: var(--warning-gradient);
+}
+
+.activity-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.activity-time {
+  font-size: 0.8rem;
+  color: var(--text-muted);
 }
 
 .compatibility-content {
   text-align: center;
+  padding: 8px 24px 24px;
 }
 
 .compatibility-score {
@@ -1159,7 +1464,6 @@ export default {
     gap: 20px;
   }
   
-  .left-column,
   .right-column {
     order: 2;
   }
@@ -1169,9 +1473,9 @@ export default {
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 900px) {
   .profile-hero {
-    padding: 40px 0 60px;
+    padding: 30px 0 50px;
   }
   
   .user-main-card {
@@ -1183,10 +1487,12 @@ export default {
   .user-header {
     flex-direction: column;
     gap: 12px;
+    align-items: center;
   }
   
   .user-stats {
     justify-content: center;
+    gap: 20px;
   }
   
   .user-actions {
@@ -1194,34 +1500,302 @@ export default {
     flex-wrap: wrap;
     justify-content: center;
     min-width: auto;
+    width: 100%;
+  }
+  
+  .action-button {
+    flex: 1;
+    min-width: 140px;
   }
   
   .username {
-    font-size: 2rem;
+    font-size: 1.8rem;
   }
   
   .profile-content {
     margin-top: -20px;
-    padding: 0 16px 20px;
+    padding: 0 16px 30px;
   }
   
-  .roles-grid {
-    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+  .content-grid {
+    gap: 16px;
+  }
+  
+  .card-header {
+    padding: 16px 20px !important;
+  }
+  
+  .card-header h3 {
+    font-size: 1.1rem;
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 768px) {
+  .hero-content {
+    padding: 0 16px;
+  }
+  
+  .profile-content {
+    padding: 0 12px 20px;
+  }
+  
+  .user-stats {
+    gap: 15px;
+  }
+  
+  .stat-item {
+    min-width: 70px;
+  }
+  
+  .stat-value {
+    font-size: 1.2rem;
+  }
+  
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .about-content,
+  .preferences-content,
+  .stats-content,
+  .activity-content,
+  .compatibility-content {
+    padding: 8px 16px 16px;
+  }
+}
+
+@media (max-width: 600px) {
+  .profile-hero {
+    padding: 25px 0 40px;
+  }
+  
+  .username {
+    font-size: 1.6rem;
+  }
+  
+  .avatar-container {
+    padding: 4px;
+  }
+  
+  .skeleton-circle {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .skeleton-title {
+    width: 160px;
+    height: 32px;
+  }
+  
   .user-stats {
     flex-direction: column;
-    gap: 20px;
+    gap: 15px;
+    align-items: center;
+  }
+  
+  .stat-item {
+    min-width: 100px;
   }
   
   .user-actions {
     flex-direction: column;
   }
   
-  .stats-grid {
-    grid-template-columns: 1fr;
+  .action-button {
+    width: 100%;
+  }
+  
+  .preference-section {
+    gap: 8px;
+  }
+  
+  .tags-container {
+    gap: 4px;
+  }
+  
+  .team-info {
+    padding: 12px;
+  }
+  
+  .score-circle {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .score-circle::before {
+    width: 64px;
+    height: 64px;
+  }
+  
+  .score-value {
+    font-size: 1.2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-content {
+    padding: 0 12px;
+  }
+  
+  .profile-content {
+    padding: 0 8px 16px;
+  }
+  
+  .username {
+    font-size: 1.4rem;
+  }
+  
+  .user-main-card {
+    gap: 20px;
+  }
+  
+  .card-header {
+    padding: 12px 16px !important;
+  }
+  
+  .card-header h3 {
+    font-size: 1rem;
+  }
+  
+  .about-content,
+  .preferences-content,
+  .stats-content,
+  .activity-content,
+  .compatibility-content {
+    padding: 8px 12px 12px;
+  }
+  
+  .empty-state {
+    padding: 30px 16px;
+  }
+  
+  .empty-state .el-icon {
+    font-size: 2.5rem;
+  }
+  
+  .factor-item {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  
+  .factor-label {
+    min-width: 50px;
+    font-size: 0.85rem;
+  }
+  
+  .factor-bar {
+    order: 3;
+    width: 100%;
+    margin: 0;
+  }
+  
+  .factor-value {
+    min-width: 25px;
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .username {
+    font-size: 1.3rem;
+  }
+  
+  .profile-content {
+    margin-top: -15px;
+  }
+  
+  .skeleton-circle {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .skeleton-title {
+    width: 140px;
+    height: 28px;
+  }
+  
+  .stat-value {
+    font-size: 1.1rem;
+  }
+  
+  .score-circle {
+    width: 70px;
+    height: 70px;
+  }
+  
+  .score-circle::before {
+    width: 56px;
+    height: 56px;
+  }
+  
+  .score-value {
+    font-size: 1.1rem;
+  }
+}
+
+/* Улучшение доступности */
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-circle,
+  .skeleton-line,
+  .skeleton-badge,
+  .skeleton-button,
+  .skeleton-tag,
+  .skeleton-icon,
+  .skeleton-dot,
+  .skeleton-bar {
+    animation: none;
+  }
+  
+  .info-card,
+  .team-info,
+  .action-button {
+    transition: none;
+  }
+  
+  .info-card:hover,
+  .team-info:hover,
+  .action-button:hover {
+    transform: none;
+  }
+}
+
+/* Исправление выхода за экран */
+.user-profile-page,
+.profile-hero,
+.profile-content,
+.hero-content {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.content-grid,
+.user-main-card,
+.user-stats,
+.user-header {
+  max-width: 100%;
+}
+
+/* Улучшение скролла */
+@media (max-width: 768px) {
+  .user-profile-page {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Улучшение отображения текста */
+.username,
+.team-details h4 {
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.user-badges {
+  justify-content: center;
+}
+
+@media (max-width: 900px) {
+  .user-badges {
+    justify-content: center;
   }
 }
 </style>

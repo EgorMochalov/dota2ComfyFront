@@ -892,6 +892,7 @@ export default {
   transition: all var(--transition-normal);
   position: relative;
   z-index: 10;
+  overflow: hidden;
 }
 
 .chat-sidebar.sidebar-collapsed {

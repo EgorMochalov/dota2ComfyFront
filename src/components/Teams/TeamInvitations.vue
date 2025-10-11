@@ -40,7 +40,7 @@
             class="player-item"
           >
             <div class="player-info">
-              <el-avatar :size="50" :src="player.avatar_url" />
+              <el-avatar :size="50" :src="authStore.user?.avatar_url ? authStore.user.avatar_url : 'https://cdn-icons-png.flaticon.com/512/3237/3237472.png'" />
               <div class="player-details">
                 <h5 @click="$router.push(`/users/${player.id}`)" class="player-name">
                   {{ player.username }}

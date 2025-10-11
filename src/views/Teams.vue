@@ -259,7 +259,7 @@
                   <!-- Заголовок карточки -->
                   <div class="team-header">
                     <div class="team-avatar">
-                      <el-avatar :size="64" :src="team.avatar_url" />
+                      <el-avatar :size="64" :src="team.avatar_url ? team.avatar_url : 'https://cdn-icons-png.flaticon.com/512/3237/3237472.png'" />
                       <div class="team-badges">
                         <el-tag 
                           v-if="team.looking_for_scrim" 

@@ -8,7 +8,7 @@
           <div class="user-avatar-section">
             <div class="avatar-container">
               <template v-if="!loading">
-                <el-avatar :size="120" :src="user?.avatar_url" fit="cover" />
+                <el-avatar :size="120" :src="user?.avatar_url ? user?.avatar_url : 'https://cdn-icons-png.flaticon.com/512/3237/3237472.png'" fit="cover" />
                 <div class="online-status" :class="{ online: isUserOnline(user?.last_online) }">
                   <div class="status-dot"></div>
                 </div>
@@ -295,7 +295,7 @@
               </div>
             </div>
             <div v-else class="team-info" @click="$router.push(`/teams/${user.team.id}`)">
-              <el-avatar :size="60" :src="user.team.avatar_url" />
+              <el-avatar :size="60" :src="user.team.avatar_url ? user.team.avatar_url : 'https://cdn-icons-png.flaticon.com/512/3237/3237472.png'" />
               <div class="team-details">
                 <h4>{{ user.team.name }}</h4>
                 <p>{{ user.team.members?.length || 0 }}/5 участников</p>

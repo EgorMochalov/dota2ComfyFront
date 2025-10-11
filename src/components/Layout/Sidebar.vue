@@ -20,7 +20,7 @@
         <!-- Карточка пользователя -->
         <div class="user-card glass-effect" v-if="!isCompact">
           <div class="user-avatar-section">
-            <el-avatar :size="64" :src="authStore.user?.avatar_url" class="user-avatar" />
+            <el-avatar :size="64" :src="authStore.user?.avatar_url ? authStore.user.avatar_url : 'https://cdn-icons-png.flaticon.com/512/3237/3237472.png'" class="user-avatar" />
             <div class="user-status-indicator" :class="getUserStatusClass"></div>
           </div>
           
@@ -52,7 +52,7 @@
         <!-- Компактная карточка пользователя -->
         <div class="user-card-compact glass-effect" v-else>
           <div class="user-avatar-section">
-            <el-avatar :size="44" :src="authStore.user?.avatar_url" class="user-avatar" />
+            <el-avatar :size="44" :src="authStore.user?.avatar_url ? authStore.user.avatar_url : 'https://cdn-icons-png.flaticon.com/512/3237/3237472.png'" class="user-avatar" />
             <div class="user-status-indicator" :class="getUserStatusClass"></div>
           </div>
           <el-tooltip

@@ -24,15 +24,15 @@
         <div class="hero-graphics">
           <div class="floating-cards">
             <div class="card card-1">
-              <el-avatar :size="60" src="/api/placeholder/60" />
+              <el-avatar :size="60" src="https://cdn-icons-png.flaticon.com/512/3237/3237472.png" />
               <span>Carry</span>
             </div>
             <div class="card card-2">
-              <el-avatar :size="60" src="/api/placeholder/60" />
+              <el-avatar :size="60" src="https://cdn-icons-png.flaticon.com/512/3237/3237472.png" />
               <span>Mid</span>
             </div>
             <div class="card card-3">
-              <el-avatar :size="60" src="/api/placeholder/60" />
+              <el-avatar :size="60" src="https://cdn-icons-png.flaticon.com/512/3237/3237472.png" />
               <span>Support</span>
             </div>
           </div>

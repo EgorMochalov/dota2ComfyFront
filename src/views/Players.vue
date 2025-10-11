@@ -254,7 +254,7 @@
             <!-- Заголовок карточки -->
             <div class="player-header">
               <div class="player-avatar">
-                <el-avatar :size="64" :src="player.avatar_url" />
+                <el-avatar :size="64" :src="player.avatar_url ? player.avatar_url : 'https://cdn-icons-png.flaticon.com/512/3237/3237472.png'" />
                 <div 
                   class="online-indicator" 
                   :class="{ online: isUserOnline(player.last_online) }"

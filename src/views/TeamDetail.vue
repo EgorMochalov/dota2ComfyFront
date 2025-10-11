@@ -16,7 +16,7 @@
           <div class="avatar-section">
             <el-avatar 
               :size="120" 
-              :src="team?.avatar_url" 
+              :src="team?.avatar_url ? team?.avatar_url : 'https://cdn-icons-png.flaticon.com/512/3237/3237472.png'"
               class="team-avatar"
             />
           </div>
@@ -191,7 +191,7 @@
                 @click="$router.push(`/users/${member.id}`)"
               >
                 <div class="member-avatar">
-                  <el-avatar :size="60" :src="member.avatar_url" />
+                  <el-avatar :size="60" :src="member.avatar_url ? member.avatar_url : 'https://cdn-icons-png.flaticon.com/512/3237/3237472.png'" />
                   <div 
                     v-if="isUserOnline(member.last_online)" 
                     class="online-indicator"
@@ -282,7 +282,7 @@
               class="captain-info"
               @click="$router.push(`/users/${team?.captain.id}`)"
             >
-              <el-avatar :size="80" :src="team?.captain.avatar_url" />
+              <el-avatar :size="80" :src="team?.captain.avatar_url ? team?.captain.avatar_url : 'https://cdn-icons-png.flaticon.com/512/3237/3237472.png'" />
               <div class="captain-details">
                 <h4 class="captain-name">{{ team?.captain.username }}</h4>
                 <p class="captain-mmr">MMR: {{ team?.captain.mmr_rating || 'Не указан' }}</p>
@@ -319,7 +319,7 @@
                 class="similar-team-item"
                 @click="$router.push(`/teams/${similarTeam.id}`)"
               >
-                <el-avatar :size="40" :src="similarTeam.avatar_url" />
+                <el-avatar :size="40" :src="similarTeam.avatar_url ? similarTeam.avatar_url : 'https://cdn-icons-png.flaticon.com/512/3237/3237472.png'" />
                 <div class="similar-team-info">
                   <h5 class="similar-team-name">{{ similarTeam.name }}</h5>
                   <p class="similar-team-mmr">

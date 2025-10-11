@@ -15,7 +15,7 @@
         <div class="team-identity">
           <div class="avatar-section">
             <div class="avatar-container">
-              <el-avatar :size="120" :src="currentTeam.avatar_url" class="team-avatar" />
+              <el-avatar :size="120" :src="currentTeam.avatar_url ? currentTeam.avatar_url : 'https://cdn-icons-png.flaticon.com/512/3237/3237472.png'" class="team-avatar" />
               <div class="avatar-overlay" v-if="isCaptain">
                 <el-upload
                   action="#"

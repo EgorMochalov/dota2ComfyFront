@@ -28,7 +28,7 @@
           <div class="user-info">
             <el-avatar 
               :size="getAvatarSize" 
-              :src="authStore.user?.avatar_url" 
+              :src="authStore.user?.avatar_url ? authStore.user.avatar_url : 'https://cdn-icons-png.flaticon.com/512/3237/3237472.png'" 
               class="user-avatar"
             />
             <div class="user-details">

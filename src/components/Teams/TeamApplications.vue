@@ -23,7 +23,7 @@
         >
           <div class="application-content">
             <div class="applicant-info">
-              <el-avatar :size="50" :src="application.user.avatar_url" />
+              <el-avatar :size="50" :src="authStore.user?.avatar_url ? authStore.user.avatar_url : 'https://cdn-icons-png.flaticon.com/512/3237/3237472.png'" />
               <div class="applicant-details">
                 <h4 
                   @click="$router.push(`/users/${application.user.id}`)" 

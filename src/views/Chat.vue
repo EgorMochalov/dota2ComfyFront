@@ -56,7 +56,7 @@
               <div class="avatar-container">
                 <el-avatar 
                   :size="mobile ? 40 : 52" 
-                  :src="getRoomAvatar(room)" 
+                  :src="getRoomAvatar(room) ? getRoomAvatar(room) : 'https://cdn-icons-png.flaticon.com/512/3237/3237472.png'"  
                   class="chat-avatar"
                   :class="{ 'online-indicator': getRoomParticipant(room)?.is_online }"
                 />
@@ -100,7 +100,7 @@
               <path d="M9 18L15 12L9 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
           </button>
-          <el-avatar :size="mobile ? 36 : 44" :src="getRoomAvatar(activeRoom)" />
+          <el-avatar :size="mobile ? 36 : 44" :src="getRoomAvatar(activeRoom) ? getRoomAvatar(activeRoom) : 'https://cdn-icons-png.flaticon.com/512/3237/3237472.png'" />
           <div class="room-info">
             <h4>{{ getRoomName(activeRoom) }}</h4>
             <p v-if="activeRoom.type === 'private'" class="online-status">
@@ -209,7 +209,7 @@
             :class="{ own: message.user_id === authStore.user?.id }"
           >
             <div class="message-avatar">
-              <el-avatar :size="mobile ? 32 : 36" :src="message.user?.avatar_url" />
+              <el-avatar :size="mobile ? 32 : 36" :src="message.user?.avatar_url ? message.user?.avatar_url : 'https://cdn-icons-png.flaticon.com/512/3237/3237472.png'" />
             </div>
             <div class="message-content">
               <div class="message-header">
@@ -288,7 +288,7 @@
     >
       <div v-if="activeRoom" class="room-info-content">
         <div class="room-header">
-          <el-avatar :size="80" :src="getRoomAvatar(activeRoom)" class="room-avatar" />
+          <el-avatar :size="80" :src="getRoomAvatar(activeRoom) ? getRoomAvatar(activeRoom) : 'https://cdn-icons-png.flaticon.com/512/3237/3237472.png'" class="room-avatar" />
           <h4>{{ getRoomName(activeRoom) }}</h4>
           <el-tag :type="activeRoom.type === 'team' ? 'primary' : 'success'" class="room-type-tag">
             {{ activeRoom.type === 'team' ? 'Командный чат' : 'Приватный чат' }}
@@ -303,7 +303,7 @@
               :key="member.id"
               class="member-item"
             >
-              <el-avatar :size="44" :src="member.avatar_url" />
+              <el-avatar :size="44" :src="member.avatar_url ? member.avatar_url : 'https://cdn-icons-png.flaticon.com/512/3237/3237472.png'" />
               <div class="member-info">
                 <span class="member-name">{{ member.username }}</span>
                 <span class="member-mmr">MMR: {{ member.mmr_rating || 'Не указан' }}</span>
@@ -318,7 +318,7 @@
         <div v-else class="private-section">
           <h5>Участник чата</h5>
           <div class="participant-card">
-            <el-avatar :size="70" :src="getRoomParticipant(activeRoom)?.avatar_url" />
+            <el-avatar :size="70" :src="getRoomParticipant(activeRoom)?.avatar_url ? getRoomParticipant(activeRoom)?.avatar_url : 'https://cdn-icons-png.flaticon.com/512/3237/3237472.png'" />
             <div class="participant-details">
               <h4>{{ getRoomParticipant(activeRoom)?.username }}</h4>
               <div class="participant-stats">

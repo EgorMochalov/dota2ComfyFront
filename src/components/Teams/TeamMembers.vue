@@ -12,7 +12,7 @@
           class="member-card"
         >
           <div class="member-info">
-            <el-avatar :size="50" :src="member.avatar_url" />
+            <el-avatar :size="50" :src="authStore.user?.avatar_url ? authStore.user.avatar_url : 'https://cdn-icons-png.flaticon.com/512/3237/3237472.png'" />
             <div class="member-details">
               <h4 
                 @click="$router.push(`/users/${member.id}`)" 

@@ -8,7 +8,7 @@
           <div class="user-avatar-section">
             <div class="avatar-container">
               <template v-if="!loadingAvatar">
-                <el-avatar :size="120" :src="authStore.user?.avatar_url" fit="cover" />
+                <el-avatar :size="120" :src="authStore.user?.avatar_url ? authStore.user?.avatar_url : 'https://cdn-icons-png.flaticon.com/512/3237/3237472.png'" fit="cover" />
                 <div class="avatar-overlay">
                   <el-upload
                     action="#"
@@ -264,7 +264,7 @@
               </div>
             </div>
             <div v-else class="team-preview" @click="$router.push('/my-team')">
-              <el-avatar :size="50" :src="currentTeam?.avatar_url" />
+              <el-avatar :size="50" :src="currentTeam?.avatar_url ? currentTeam?.avatar_url : 'https://cdn-icons-png.flaticon.com/512/3237/3237472.png'" />
               <div class="team-info">
                 <h4>{{ currentTeam?.name }}</h4>
                 <p>{{ currentTeam?.members?.length || 0 }}/5 участников</p>

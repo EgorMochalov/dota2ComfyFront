@@ -1,13 +1,5 @@
 <template>
   <footer class="footer">
-    <div class="footer-background">
-      <div class="footer-waves">
-        <div class="wave wave-1"></div>
-        <div class="wave wave-2"></div>
-        <div class="wave wave-3"></div>
-      </div>
-    </div>
-    
     <div class="footer-content">
       <!-- Основные секции -->
       <div class="footer-main">
@@ -91,11 +83,6 @@
           <a href="#" class="meta-link">Cookie</a>
         </div>
       </div>
-    </div>
-
-    <!-- Кнопка "Наверх" -->
-    <div class="scroll-to-top" :class="{ visible: showScrollTop }" @click="scrollToTop">
-      <el-icon><ArrowUp /></el-icon>
     </div>
   </footer>
 </template>

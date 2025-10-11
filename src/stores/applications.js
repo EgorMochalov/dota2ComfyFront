@@ -22,7 +22,7 @@ export const useApplicationsStore = defineStore('applications', () => {
   const getTeamApplications = async (teamId) => {
     try {
       const response = await applicationsAPI.getTeamApplications(teamId)
-      teamApplications.value = response.data
+      teamApplications.value = response.data.applications
       return response.data
     } catch (error) {
       ElMessage.error('Ошибка загрузки заявок')

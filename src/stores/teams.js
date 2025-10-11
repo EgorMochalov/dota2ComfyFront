@@ -48,6 +48,7 @@ export const useTeamsStore = defineStore('teams', () => {
   const getTeam = async (teamId) => {
     try {
       const response = await teamsAPI.getTeam(teamId)
+      currentTeam.value = response.data
       return response.data
     } catch (error) {
       ElMessage.error(error.response?.data?.message || 'Ошибка загрузки команды')

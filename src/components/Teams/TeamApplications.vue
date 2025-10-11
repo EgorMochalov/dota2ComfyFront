@@ -14,7 +14,6 @@
           </el-button>
         </div>
       </template>
-
       <div v-if="applications.length" class="applications-list">
         <div
           v-for="application in applications"
@@ -23,20 +22,20 @@
         >
           <div class="application-content">
             <div class="applicant-info">
-              <el-avatar :size="50" :src="authStore.user?.avatar_url ? authStore.user.avatar_url : 'https://cdn-icons-png.flaticon.com/512/3237/3237472.png'" />
+              <el-avatar :size="50" :src="application?.User?.avatar_url ? application.User.avatar_url : 'https://cdn-icons-png.flaticon.com/512/3237/3237472.png'" />
               <div class="applicant-details">
                 <h4 
                   @click="$router.push(`/users/${application.user.id}`)" 
                   class="applicant-name"
                 >
-                  {{ application.user.username }}
+                  {{ application.User.username }}
                 </h4>
                 <div class="applicant-stats">
-                  <span>MMR: {{ application.user.mmr_rating || 'Не указан' }}</span>
-                  <span>Регион: {{ getRegionLabel(application.user.region) }}</span>
+                  <span>MMR: {{ application.User.mmr_rating || 'Не указан' }}</span>
+                  <span>Регион: {{ getRegionLabel(application.User.region) }}</span>
                   <span>Роли: 
                     <el-tag
-                      v-for="role in application.user.preferred_roles"
+                      v-for="role in application.User.preferred_roles"
                       :key="role"
                       size="small"
                     >
@@ -107,7 +106,7 @@ export default {
     const loading = ref(false)
 
     const canManageApplications = computed(() => {
-      return teamsStore.currentTeam?.captain_id === authStore.user?.id
+      return teamsStore.currentTeam?.captain.id === authStore.user?.id
     })
 
     const getRegionLabel = (regionValue) => {
@@ -132,11 +131,10 @@ export default {
 
     const loadApplications = async () => {
       if (!canManageApplications.value) return
-      
       loading.value = true
       try {
-        await teamsStore.getTeamApplications(props.teamId)
-        applications.value = teamsStore.teamApplications.map(app => ({ 
+        await applicationsStore.getTeamApplications(props.teamId)
+        applications.value = applicationsStore.teamApplications.map(app => ({ 
           ...app, 
           loading: false 
         }))

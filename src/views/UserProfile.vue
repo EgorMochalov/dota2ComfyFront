@@ -46,7 +46,7 @@
               <div class="user-stats">
                 <div class="stat-item">
                   <div class="stat-value">{{ user?.mmr_rating || 'Не указан' }}</div>
-                  <div class="stat-label">MMR рейтинг</div>
+                  <div class="stat-label">MMR</div>
                 </div>
                 <div class="stat-item">
                   <div class="stat-value">{{ getRegionLabel(user?.region) }}</div>

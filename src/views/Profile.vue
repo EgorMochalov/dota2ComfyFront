@@ -139,7 +139,7 @@
                   </el-select>
                 </el-form-item>
 
-                <el-form-item label="MMR рейтинг" prop="mmr_rating">
+                <el-form-item label="MMR" prop="mmr_rating">
                   <el-input-number
                     v-model="profileForm.mmr_rating"
                     :min="0"

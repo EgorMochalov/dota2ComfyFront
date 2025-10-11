@@ -75,6 +75,7 @@
             type="warning"
             size="large"
             @click="contactForScrim"
+            :disabled="authStore.user?.team_id === team.id"
             class="action-btn"
           >
             <template #icon>
@@ -534,8 +535,8 @@ export default {
     }
 
     const contactForScrim = () => {
-      if (team.value.captain_id) {
-        startChat(team.value.captain_id)
+      if (team.value.captain.id) {
+        startChat(team.value.captain.id)
       }
     }
 

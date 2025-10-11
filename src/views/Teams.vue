@@ -386,6 +386,7 @@
                       type="warning"
                       size="small"
                       @click="contactForScrim(team)"
+                      :disabled="authStore.user?.team_id === team.id"
                       class="action-btn"
                     >
                       <el-icon><ChatDotRound /></el-icon>
@@ -1342,6 +1343,8 @@ export default {
   transition: var(--transition-normal);
   position: relative;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .team-card::before {
@@ -1543,6 +1546,7 @@ export default {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+  margin-top: auto;
 }
 
 .action-btn {

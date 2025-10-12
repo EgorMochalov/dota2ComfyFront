@@ -23,8 +23,8 @@
           >
             <div class="invitation-content">
               <div class="invitation-header">
-                <h4 @click="$router.push(`/teams/${invitation.team.id}`)" class="team-name">
-                  {{ invitation.team?.name }}
+                <h4 @click="$router.push(`/teams/${invitation.Team.id}`)" class="team-name">
+                  {{ invitation.Team?.name }}
                 </h4>
                 <el-tag :type="getStatusType(invitation.status)" size="small">
                   {{ getStatusText(invitation.status) }}
@@ -32,10 +32,10 @@
               </div>
               
               <div class="invitation-team-info">
-                <p><strong>Капитан:</strong> {{ invitation.team?.captain?.username }}</p>
-                <p><strong>Регион:</strong> {{ getRegionLabel(invitation.team?.region) }}</p>
-                <p><strong>MMR диапазон:</strong> {{ invitation.team?.mmr_range_min }} - {{ invitation.team?.mmr_range_max }}</p>
-                <p><strong>Состав команды:</strong> {{ invitation.team?.members?.length || 0 }} участников</p>
+                <p><strong>Капитан:</strong> {{ invitation.Team?.captain?.username }}</p>
+                <p><strong>Регион:</strong> {{ getRegionLabel(invitation.Team?.region) }}</p>
+                <p><strong>MMR диапазон:</strong> {{ invitation.Team?.mmr_range_min }} - {{ invitation.Team?.mmr_range_max }}</p>
+                <p><strong>Состав команды:</strong> {{ invitation.Team?.members?.length || 0 }} участников</p>
               </div>
 
               <p class="invitation-message" v-if="invitation.message">
